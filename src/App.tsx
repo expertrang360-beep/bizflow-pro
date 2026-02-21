@@ -18,6 +18,8 @@ import ExpensesPage from "@/pages/ExpensesPage";
 import NewExpensePage from "@/pages/NewExpensePage";
 import CustomersPage from "@/pages/CustomersPage";
 import SuppliersPage from "@/pages/SuppliersPage";
+import PurchasesPage from "@/pages/PurchasesPage";
+import NewPurchasePage from "@/pages/NewPurchasePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +57,8 @@ function AppRoutes() {
         <Route path="/expenses/new" element={<NewExpensePage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/suppliers" element={<SuppliersPage />} />
+        <Route path="/purchases" element={<PurchasesPage />} />
+        <Route path="/purchases/new" element={<NewPurchasePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
