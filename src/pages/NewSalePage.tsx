@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatNaira, DEFAULT_BRANCH_ID } from "@/lib/bizkit";
-import { ArrowLeft, Plus, Trash2, Search, Check, User } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Search, Check, User, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { downloadReceipt, shareReceipt, type ReceiptData } from "@/lib/receipt-pdf";
 
 interface Product {
   id: string;
@@ -52,6 +53,7 @@ export default function NewSalePage() {
   const [tax, setTax] = useState(0);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [completedReceipt, setCompletedReceipt] = useState<ReceiptData | null>(null);
 
   useEffect(() => {
     supabase.from("products").select("*").eq("active", true).then(({ data }) => setProducts((data as Product[]) || []));
@@ -163,8 +165,22 @@ export default function NewSalePage() {
         await supabase.from("customers").update({ total_credit: (Number(cust?.total_credit) || 0) + total }).eq("id", selectedCustomer.id);
       }
 
+      const receiptData: ReceiptData = {
+        saleId: sale.id,
+        date: new Date(sale.created_at).toLocaleString("en-NG"),
+        items: items.map(i => ({ product_name: i.product_name, qty: i.qty, price: i.price, discount: i.discount, total: i.total })),
+        subtotal,
+        discount,
+        tax,
+        total,
+        amountPaid: paymentType === "credit" ? 0 : total,
+        paymentType,
+        status: saleStatus,
+        customerName: selectedCustomer?.name,
+        note: note || undefined,
+      };
+      setCompletedReceipt(receiptData);
       toast({ title: "Sale recorded! 🎉", description: `${formatNaira(total)} — ${paymentType.toUpperCase()}` });
-      navigate("/sales");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to save sale";
       toast({ variant: "destructive", title: "Error", description: msg });
@@ -179,6 +195,44 @@ export default function NewSalePage() {
     { key: "pos", label: "POS", icon: "💳" },
     { key: "credit", label: "Credit", icon: "📋" },
   ];
+
+  if (completedReceipt) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-full px-6 py-12">
+        <div className="w-20 h-20 bg-[hsl(var(--success-light))] rounded-full flex items-center justify-center mb-6">
+          <Check className="w-10 h-10 text-[hsl(var(--success))]" />
+        </div>
+        <h2 className="text-2xl font-bold mb-1">Sale Complete!</h2>
+        <p className="text-muted-foreground text-sm mb-6">{formatNaira(completedReceipt.total)} — {completedReceipt.paymentType.toUpperCase()}</p>
+
+        <div className="flex gap-3 w-full max-w-xs mb-4">
+          <Button
+            onClick={() => downloadReceipt(completedReceipt)}
+            variant="outline"
+            className="flex-1 h-12 gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Download
+          </Button>
+          <Button
+            onClick={() => shareReceipt(completedReceipt)}
+            className="flex-1 h-12 gap-2 bg-primary text-primary-foreground"
+          >
+            <Share2 className="w-4 h-4" />
+            Share
+          </Button>
+        </div>
+
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/sales")}
+          className="text-muted-foreground"
+        >
+          Back to Sales
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-full">

@@ -9,6 +9,7 @@ import AuthPage from "@/pages/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
 import SalesPage from "@/pages/SalesPage";
 import NewSalePage from "@/pages/NewSalePage";
+import SaleDetailPage from "@/pages/SaleDetailPage";
 import InventoryPage from "@/pages/InventoryPage";
 import NewProductPage from "@/pages/NewProductPage";
 import ReportsPage from "@/pages/ReportsPage";
@@ -45,6 +46,7 @@ function AppRoutes() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/sales" element={<SalesPage />} />
         <Route path="/sales/new" element={<NewSalePage />} />
+        <Route path="/sales/:id" element={<SaleDetailPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/inventory/new" element={<NewProductPage />} />
         <Route path="/reports" element={<ReportsPage />} />
