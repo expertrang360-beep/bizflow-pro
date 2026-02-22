@@ -92,8 +92,8 @@ export default function CustomersPage() {
       </div>
 
       {showAdd && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-foreground/20">
-          <div className="bg-card rounded-t-3xl p-5 space-y-4 shadow-lg">
+        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-foreground/20" onClick={() => setShowAdd(false)}>
+          <div className="bg-card rounded-t-3xl p-5 space-y-4 shadow-lg max-h-[85vh] overflow-y-auto pb-safe" onClick={e => e.stopPropagation()}>
             <h2 className="font-bold text-lg">Add Customer</h2>
             <div>
               <Label className="text-sm font-medium mb-1.5 block">Name *</Label>
