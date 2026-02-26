@@ -7,13 +7,24 @@ import { useToast } from "@/hooks/use-toast";
 import { Briefcase, Lock, Mail, User, Eye, EyeOff, ArrowRight, Phone } from "lucide-react";
 
 type Mode = "login" | "signup" | "forgot";
+type SignupMethod = "email" | "phone";
+type LoginMethod = "email" | "phone";
+
+/** Generate a deterministic placeholder email from a phone number */
+const phoneToEmail = (phone: string) => {
+  const digits = phone.replace(/\D/g, "");
+  return `phone_${digits}@bizkit.local`;
+};
 
 export default function AuthPage() {
   const [mode, setMode] = useState<Mode>("login");
+  const [signupMethod, setSignupMethod] = useState<SignupMethod>("email");
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [loginPhone, setLoginPhone] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -24,15 +35,20 @@ export default function AuthPage() {
 
     try {
       if (mode === "signup") {
+        const signupEmail = signupMethod === "phone" ? phoneToEmail(phone) : email;
         const { error } = await supabase.auth.signUp({
-          email,
+          email: signupEmail,
           password,
-          options: { data: { name, phone }, emailRedirectTo: window.location.origin },
+          options: {
+            data: { name, phone: signupMethod === "phone" ? phone : (phone || undefined) },
+            emailRedirectTo: window.location.origin,
+          },
         });
         if (error) throw error;
         toast({ title: "Account created!", description: "You can now sign in." });
       } else if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const loginEmail = loginMethod === "phone" ? phoneToEmail(loginPhone) : email;
+        const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
         if (error) throw error;
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -74,6 +90,64 @@ export default function AuthPage() {
       {/* Form */}
       <div className="flex-1 px-6 py-8">
         <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
+
+          {/* Signup method toggle */}
+          {mode === "signup" && (
+            <div className="flex rounded-lg border border-border overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setSignupMethod("email")}
+                className={`flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                  signupMethod === "email"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <Mail className="w-4 h-4" /> Email
+              </button>
+              <button
+                type="button"
+                onClick={() => setSignupMethod("phone")}
+                className={`flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                  signupMethod === "phone"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <Phone className="w-4 h-4" /> Phone
+              </button>
+            </div>
+          )}
+
+          {/* Login method toggle */}
+          {mode === "login" && (
+            <div className="flex rounded-lg border border-border overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setLoginMethod("email")}
+                className={`flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                  loginMethod === "email"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <Mail className="w-4 h-4" /> Email
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMethod("phone")}
+                className={`flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-1.5 transition-colors ${
+                  loginMethod === "phone"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <Phone className="w-4 h-4" /> Phone
+              </button>
+            </div>
+          )}
+
+          {/* Name field (signup only) */}
           {mode === "signup" && (
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
@@ -92,7 +166,8 @@ export default function AuthPage() {
             </div>
           )}
 
-          {mode === "signup" && (
+          {/* Phone field for phone signup */}
+          {mode === "signup" && signupMethod === "phone" && (
             <div className="space-y-1.5">
               <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
               <div className="relative">
@@ -104,26 +179,49 @@ export default function AuthPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="pl-10 h-11"
+                  required
                 />
               </div>
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-11"
-                required
-              />
+          {/* Email field for email signup / email login / forgot */}
+          {((mode === "signup" && signupMethod === "email") || (mode === "login" && loginMethod === "email") || mode === "forgot") && (
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 h-11"
+                  required
+                />
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Phone field for phone login */}
+          {mode === "login" && loginMethod === "phone" && (
+            <div className="space-y-1.5">
+              <Label htmlFor="loginPhone" className="text-sm font-medium">Phone Number</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="loginPhone"
+                  type="tel"
+                  placeholder="+234 800 000 0000"
+                  value={loginPhone}
+                  onChange={(e) => setLoginPhone(e.target.value)}
+                  className="pl-10 h-11"
+                  required
+                />
+              </div>
+            </div>
+          )}
 
           {mode !== "forgot" && (
             <div className="space-y-1.5">
@@ -151,7 +249,7 @@ export default function AuthPage() {
             </div>
           )}
 
-          {mode === "login" && (
+          {mode === "login" && loginMethod === "email" && (
             <button
               type="button"
               onClick={() => setMode("forgot")}
