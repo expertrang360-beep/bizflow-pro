@@ -17,6 +17,7 @@ import MorePage from "@/pages/MorePage";
 import ExpensesPage from "@/pages/ExpensesPage";
 import NewExpensePage from "@/pages/NewExpensePage";
 import CustomersPage from "@/pages/CustomersPage";
+import CustomerDetailPage from "@/pages/CustomerDetailPage";
 import SuppliersPage from "@/pages/SuppliersPage";
 import PurchasesPage from "@/pages/PurchasesPage";
 import NewPurchasePage from "@/pages/NewPurchasePage";
@@ -56,6 +57,7 @@ function AppRoutes() {
         <Route path="/expenses" element={<ExpensesPage />} />
         <Route path="/expenses/new" element={<NewExpensePage />} />
         <Route path="/customers" element={<CustomersPage />} />
+        <Route path="/customers/:id" element={<CustomerDetailPage />} />
         <Route path="/suppliers" element={<SuppliersPage />} />
         <Route path="/purchases" element={<PurchasesPage />} />
         <Route path="/purchases/new" element={<NewPurchasePage />} />
