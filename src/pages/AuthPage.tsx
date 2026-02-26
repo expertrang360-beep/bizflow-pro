@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Lock, Mail, User, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Briefcase, Lock, Mail, User, Eye, EyeOff, ArrowRight, Phone } from "lucide-react";
 
 type Mode = "login" | "signup" | "forgot";
 
@@ -13,6 +13,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -26,10 +27,10 @@ export default function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { name }, emailRedirectTo: window.location.origin },
+          options: { data: { name, phone }, emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast({ title: "Account created!", description: "Check your email to verify your account." });
+        toast({ title: "Account created!", description: "You can now sign in." });
       } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -86,6 +87,23 @@ export default function AuthPage() {
                   onChange={(e) => setName(e.target.value)}
                   className="pl-10 h-11"
                   required
+                />
+              </div>
+            </div>
+          )}
+
+          {mode === "signup" && (
+            <div className="space-y-1.5">
+              <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+234 800 000 0000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="pl-10 h-11"
                 />
               </div>
             </div>
