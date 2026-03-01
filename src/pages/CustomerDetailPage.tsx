@@ -75,9 +75,12 @@ export default function CustomerDetailPage() {
       }).select().single();
       if (error) throw error;
 
-      // 2. Reduce customer total_credit
-      const newCredit = Number(customer.total_credit) - payAmount;
-      await supabase.from("customers").update({ total_credit: newCredit }).eq("id", customer.id);
+      // 2. Reduce customer total_credit atomically
+      const { error: creditErr } = await supabase.rpc("update_customer_credit_atomic", {
+        p_customer_id: customer.id,
+        p_credit_delta: -payAmount,
+      });
+      if (creditErr) throw new Error(`Credit update failed: ${creditErr.message}`);
 
       // 3. Cashbook inflow
       await supabase.from("cashbook_entries").insert({

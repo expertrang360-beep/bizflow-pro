@@ -791,6 +791,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_customer_credit_atomic: {
+        Args: { p_credit_delta: number; p_customer_id: string }
+        Returns: number
+      }
+      update_stock_atomic: {
+        Args: { p_product_id: string; p_quantity_delta: number }
+        Returns: number
+      }
+      update_supplier_payable_atomic: {
+        Args: { p_payable_delta: number; p_supplier_id: string }
+        Returns: number
+      }
+      user_can_access_branch: {
+        Args: { p_branch_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "owner" | "manager" | "cashier" | "accountant"

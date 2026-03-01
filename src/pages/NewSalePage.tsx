@@ -133,9 +133,13 @@ export default function NewSalePage() {
       }));
       await supabase.from("sale_items").insert(items);
 
-      // Deduct stock
+      // Deduct stock atomically
       for (const item of cart) {
-        await supabase.from("products").update({ stock_qty: item.product.stock_qty - item.qty }).eq("id", item.product.id);
+        const { error: stockErr } = await supabase.rpc("update_stock_atomic", {
+          p_product_id: item.product.id,
+          p_quantity_delta: -item.qty,
+        });
+        if (stockErr) throw new Error(`Stock update failed for ${item.product.name}: ${stockErr.message}`);
         await supabase.from("inventory_movements").insert({
           product_id: item.product.id,
           type: "sale",
@@ -159,10 +163,13 @@ export default function NewSalePage() {
         });
       }
 
-      // Update customer credit
+      // Update customer credit atomically
       if (paymentType === "credit" && selectedCustomer) {
-        const { data: cust } = await supabase.from("customers").select("total_credit").eq("id", selectedCustomer.id).single();
-        await supabase.from("customers").update({ total_credit: (Number(cust?.total_credit) || 0) + total }).eq("id", selectedCustomer.id);
+        const { error: creditErr } = await supabase.rpc("update_customer_credit_atomic", {
+          p_customer_id: selectedCustomer.id,
+          p_credit_delta: total,
+        });
+        if (creditErr) throw new Error(`Credit update failed: ${creditErr.message}`);
       }
 
       const receiptData: ReceiptData = {
