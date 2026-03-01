@@ -127,9 +127,13 @@ export default function NewPurchasePage() {
       }));
       await supabase.from("purchase_items").insert(purchaseItems);
 
-      // Increase stock + inventory movements
+      // Increase stock atomically + inventory movements
       for (const item of items) {
-        await supabase.from("products").update({ stock_qty: item.product.stock_qty + item.qty }).eq("id", item.product.id);
+        const { error: stockErr } = await supabase.rpc("update_stock_atomic", {
+          p_product_id: item.product.id,
+          p_quantity_delta: item.qty,
+        });
+        if (stockErr) throw new Error(`Stock update failed for ${item.product.name}: ${stockErr.message}`);
         await supabase.from("inventory_movements").insert({
           product_id: item.product.id,
           type: "purchase",
@@ -153,11 +157,14 @@ export default function NewPurchasePage() {
         });
       }
 
-      // Update supplier payable if not fully paid
+      // Update supplier payable atomically if not fully paid
       if (paymentStatus !== "paid") {
-        const { data: sup } = await supabase.from("suppliers").select("total_payable").eq("id", selectedSupplier.id).single();
         const balance = total - paidAmount;
-        await supabase.from("suppliers").update({ total_payable: (Number(sup?.total_payable) || 0) + balance }).eq("id", selectedSupplier.id);
+        const { error: payableErr } = await supabase.rpc("update_supplier_payable_atomic", {
+          p_supplier_id: selectedSupplier.id,
+          p_payable_delta: balance,
+        });
+        if (payableErr) throw new Error(`Supplier payable update failed: ${payableErr.message}`);
       }
 
       toast({ title: "Purchase recorded! 📦", description: `${formatNaira(total)} from ${selectedSupplier.name}` });
