@@ -137,7 +137,7 @@ export default {
   			card: '0 1px 3px hsl(220 30% 10% / 0.08)',
   			'card-hover': '0 4px 12px hsl(220 30% 10% / 0.12)',
   			'primary-btn': '0 4px 14px hsl(var(--primary) / 0.35)',
-  			'nav': '0 -2px 16px hsl(220 30% 10% / 0.08)',
+  			nav: '0 -2px 16px hsl(220 30% 10% / 0.08)',
   			'2xs': 'var(--shadow-2xs)',
   			xs: 'var(--shadow-xs)',
   			sm: 'var(--shadow-sm)',
@@ -148,19 +148,20 @@ export default {
   		},
   		fontFamily: {
   			sans: [
-  				'Roboto',
+  				'Space Grotesk',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
   				'BlinkMacSystemFont',
   				'Segoe UI',
+  				'Roboto',
   				'Helvetica Neue',
   				'Arial',
   				'Noto Sans',
   				'sans-serif'
   			],
   			serif: [
-  				'Libre Caslon Text',
+  				'Lora',
   				'ui-serif',
   				'Georgia',
   				'Cambria',
@@ -169,7 +170,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'Roboto Mono',
+  				'Space Mono',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
