@@ -6,17 +6,25 @@ import {
   BarChart2,
   MoreHorizontal,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
-const navItems = [
+type AppRole = "owner" | "manager" | "cashier" | "accountant";
+
+const navItems: { to: string; icon: typeof LayoutDashboard; label: string; roles?: AppRole[] }[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/sales", icon: ShoppingCart, label: "Sales" },
   { to: "/inventory", icon: Package, label: "Inventory" },
-  { to: "/reports", icon: BarChart2, label: "Reports" },
+  { to: "/reports", icon: BarChart2, label: "Reports", roles: ["owner", "manager", "accountant"] },
   { to: "/more", icon: MoreHorizontal, label: "More" },
 ];
 
 export default function BottomNav() {
   const location = useLocation();
+  const { hasAnyRole, roles } = useAuth();
+
+  const visibleItems = navItems.filter(
+    (item) => !item.roles || roles.length === 0 || hasAnyRole(item.roles)
+  );
 
   return (
     <nav
@@ -24,7 +32,7 @@ export default function BottomNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <div className="flex items-center justify-around h-16">
-        {navItems.map(({ to, icon: Icon, label }) => {
+        {visibleItems.map(({ to, icon: Icon, label }) => {
           const isActive =
             to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
           return (
