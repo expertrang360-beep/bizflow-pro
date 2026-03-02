@@ -22,6 +22,7 @@ import SuppliersPage from "@/pages/SuppliersPage";
 import PurchasesPage from "@/pages/PurchasesPage";
 import NewPurchasePage from "@/pages/NewPurchasePage";
 import NotFound from "@/pages/NotFound";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -51,16 +52,44 @@ function AppRoutes() {
         <Route path="/sales/new" element={<NewSalePage />} />
         <Route path="/sales/:id" element={<SaleDetailPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
-        <Route path="/inventory/new" element={<NewProductPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/inventory/new" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <NewProductPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/reports" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <ReportsPage />
+          </ProtectedRoute>
+        } />
         <Route path="/more" element={<MorePage />} />
-        <Route path="/expenses" element={<ExpensesPage />} />
-        <Route path="/expenses/new" element={<NewExpensePage />} />
+        <Route path="/expenses" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <ExpensesPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/expenses/new" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <NewExpensePage />
+          </ProtectedRoute>
+        } />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
-        <Route path="/suppliers" element={<SuppliersPage />} />
-        <Route path="/purchases" element={<PurchasesPage />} />
-        <Route path="/purchases/new" element={<NewPurchasePage />} />
+        <Route path="/suppliers" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <SuppliersPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/purchases" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <PurchasesPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/purchases/new" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <NewPurchasePage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

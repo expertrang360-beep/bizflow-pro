@@ -2,16 +2,22 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase } from "lucide-react";
 
-const menuItems = [
-  { label: "Expenses", icon: TrendingDown, to: "/expenses", color: "text-destructive", bg: "bg-destructive/10" },
+type AppRole = "owner" | "manager" | "cashier" | "accountant";
+
+const menuItems: { label: string; icon: typeof TrendingDown; to: string; color: string; bg: string; roles?: AppRole[] }[] = [
+  { label: "Expenses", icon: TrendingDown, to: "/expenses", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager", "accountant"] },
   { label: "Customers & Debts", icon: Users, to: "/customers", color: "text-primary", bg: "bg-primary/10" },
-  { label: "Suppliers", icon: Truck, to: "/suppliers", color: "text-warning", bg: "bg-warning/10" },
-  { label: "Purchases", icon: BookOpen, to: "/purchases", color: "text-accent", bg: "bg-accent/10" },
+  { label: "Suppliers", icon: Truck, to: "/suppliers", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager", "accountant"] },
+  { label: "Purchases", icon: BookOpen, to: "/purchases", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager", "accountant"] },
 ];
 
 export default function MorePage() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, hasAnyRole, roles } = useAuth();
+
+  const visibleMenuItems = menuItems.filter(
+    (item) => !item.roles || roles.length === 0 || hasAnyRole(item.roles)
+  );
 
   const userName = user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
 
@@ -32,7 +38,7 @@ export default function MorePage() {
       <div className="flex-1 px-4 py-4 space-y-3 animate-fade-in">
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Modules</h2>
         <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
-          {menuItems.map(({ label, icon: Icon, to, color, bg }, i) => (
+          {visibleMenuItems.map(({ label, icon: Icon, to, color, bg }, i) => (
             <button
               key={to}
               onClick={() => navigate(to)}
