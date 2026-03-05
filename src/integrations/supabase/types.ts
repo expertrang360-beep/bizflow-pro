@@ -49,6 +49,118 @@ export type Database = {
           },
         ]
       }
+      asset_maintenance: {
+        Row: {
+          asset_id: string
+          cost: number
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          maintenance_date: string
+          performed_by: string | null
+        }
+        Insert: {
+          asset_id: string
+          cost?: number
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          maintenance_date?: string
+          performed_by?: string | null
+        }
+        Update: {
+          asset_id?: string
+          cost?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          maintenance_date?: string
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_maintenance_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assets: {
+        Row: {
+          branch_id: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          depreciation_method: Database["public"]["Enums"]["depreciation_method"]
+          description: string | null
+          disposal_amount: number | null
+          disposal_date: string | null
+          id: string
+          location: string | null
+          name: string
+          purchase_cost: number
+          purchase_date: string
+          salvage_value: number
+          serial_number: string | null
+          status: Database["public"]["Enums"]["asset_status"]
+          updated_at: string
+          useful_life_months: number
+        }
+        Insert: {
+          branch_id?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          depreciation_method?: Database["public"]["Enums"]["depreciation_method"]
+          description?: string | null
+          disposal_amount?: number | null
+          disposal_date?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          purchase_cost?: number
+          purchase_date?: string
+          salvage_value?: number
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["asset_status"]
+          updated_at?: string
+          useful_life_months?: number
+        }
+        Update: {
+          branch_id?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          depreciation_method?: Database["public"]["Enums"]["depreciation_method"]
+          description?: string | null
+          disposal_amount?: number | null
+          disposal_date?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          purchase_cost?: number
+          purchase_date?: string
+          salvage_value?: number
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["asset_status"]
+          updated_at?: string
+          useful_life_months?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -339,6 +451,119 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_items: {
+        Row: {
+          allowances: number
+          base_salary: number
+          id: string
+          net_pay: number
+          other_deductions: number
+          paye_tax: number
+          payroll_run_id: string
+          pension: number
+          staff_name: string
+          staff_salary_id: string
+        }
+        Insert: {
+          allowances?: number
+          base_salary?: number
+          id?: string
+          net_pay?: number
+          other_deductions?: number
+          paye_tax?: number
+          payroll_run_id: string
+          pension?: number
+          staff_name: string
+          staff_salary_id: string
+        }
+        Update: {
+          allowances?: number
+          base_salary?: number
+          id?: string
+          net_pay?: number
+          other_deductions?: number
+          paye_tax?: number
+          payroll_run_id?: string
+          pension?: number
+          staff_name?: string
+          staff_salary_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_items_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_items_staff_salary_id_fkey"
+            columns: ["staff_salary_id"]
+            isOneToOne: false
+            referencedRelation: "staff_salaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_runs: {
+        Row: {
+          approved_by: string | null
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          paid_date: string | null
+          pay_period: string
+          period_end: string
+          period_start: string
+          status: Database["public"]["Enums"]["payroll_status"]
+          total_deductions: number
+          total_gross: number
+          total_net: number
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          paid_date?: string | null
+          pay_period: string
+          period_end: string
+          period_start: string
+          status?: Database["public"]["Enums"]["payroll_status"]
+          total_deductions?: number
+          total_gross?: number
+          total_net?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          paid_date?: string | null
+          pay_period?: string
+          period_end?: string
+          period_start?: string
+          status?: Database["public"]["Enums"]["payroll_status"]
+          total_deductions?: number
+          total_gross?: number
+          total_net?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_runs_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
             referencedColumns: ["id"]
           },
         ]
@@ -650,6 +875,56 @@ export type Database = {
           },
         ]
       }
+      staff_salaries: {
+        Row: {
+          account_number: string | null
+          active: boolean
+          bank_name: string | null
+          base_salary: number
+          branch_id: string | null
+          created_at: string
+          id: string
+          role: string | null
+          staff_name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          account_number?: string | null
+          active?: boolean
+          bank_name?: string | null
+          base_salary?: number
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          role?: string | null
+          staff_name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          account_number?: string | null
+          active?: boolean
+          bank_name?: string | null
+          base_salary?: number
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          role?: string | null
+          staff_name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_salaries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_payments: {
         Row: {
           amount: number
@@ -749,6 +1024,68 @@ export type Database = {
           },
         ]
       }
+      tax_records: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          filed_date: string | null
+          id: string
+          note: string | null
+          paid_date: string | null
+          period_end: string
+          period_start: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["tax_period_status"]
+          tax_amount: number
+          tax_type: Database["public"]["Enums"]["tax_type"]
+          taxable_amount: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          filed_date?: string | null
+          id?: string
+          note?: string | null
+          paid_date?: string | null
+          period_end: string
+          period_start: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["tax_period_status"]
+          tax_amount?: number
+          tax_type: Database["public"]["Enums"]["tax_type"]
+          taxable_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          filed_date?: string | null
+          id?: string
+          note?: string | null
+          paid_date?: string | null
+          period_end?: string
+          period_start?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["tax_period_status"]
+          tax_amount?: number
+          tax_type?: Database["public"]["Enums"]["tax_type"]
+          taxable_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_records_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           branch_id: string | null
@@ -810,10 +1147,15 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "manager" | "cashier" | "accountant"
+      asset_status: "active" | "disposed" | "maintenance" | "retired"
       cashbook_direction: "in" | "out"
+      depreciation_method: "straight_line" | "declining_balance"
       payment_type: "cash" | "transfer" | "pos" | "credit"
+      payroll_status: "draft" | "approved" | "paid"
       purchase_status: "paid" | "partial" | "unpaid"
       sale_status: "completed" | "credit" | "partial" | "cancelled"
+      tax_period_status: "open" | "filed" | "paid"
+      tax_type: "vat" | "cit"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -942,10 +1284,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "manager", "cashier", "accountant"],
+      asset_status: ["active", "disposed", "maintenance", "retired"],
       cashbook_direction: ["in", "out"],
+      depreciation_method: ["straight_line", "declining_balance"],
       payment_type: ["cash", "transfer", "pos", "credit"],
+      payroll_status: ["draft", "approved", "paid"],
       purchase_status: ["paid", "partial", "unpaid"],
       sale_status: ["completed", "credit", "partial", "cancelled"],
+      tax_period_status: ["open", "filed", "paid"],
+      tax_type: ["vat", "cit"],
     },
   },
 } as const
