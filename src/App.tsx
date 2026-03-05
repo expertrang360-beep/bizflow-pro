@@ -22,6 +22,11 @@ import SuppliersPage from "@/pages/SuppliersPage";
 import PurchasesPage from "@/pages/PurchasesPage";
 import NewPurchasePage from "@/pages/NewPurchasePage";
 import NotFound from "@/pages/NotFound";
+import AssetsPage from "@/pages/AssetsPage";
+import NewAssetPage from "@/pages/NewAssetPage";
+import TaxPage from "@/pages/TaxPage";
+import PayrollPage from "@/pages/PayrollPage";
+import ProfitLossPage from "@/pages/ProfitLossPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -88,6 +93,31 @@ function AppRoutes() {
         <Route path="/purchases/new" element={
           <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
             <NewPurchasePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/assets" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <AssetsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/assets/new" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <NewAssetPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/tax" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <TaxPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/payroll" element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <PayrollPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/profit-loss" element={
+          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+            <ProfitLossPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />

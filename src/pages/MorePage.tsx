@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase } from "lucide-react";
+import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText } from "lucide-react";
 
 type AppRole = "owner" | "manager" | "cashier" | "accountant";
 
@@ -9,6 +9,10 @@ const menuItems: { label: string; icon: typeof TrendingDown; to: string; color: 
   { label: "Customers & Debts", icon: Users, to: "/customers", color: "text-primary", bg: "bg-primary/10" },
   { label: "Suppliers", icon: Truck, to: "/suppliers", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager", "accountant"] },
   { label: "Purchases", icon: BookOpen, to: "/purchases", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager", "accountant"] },
+  { label: "Assets", icon: Building2, to: "/assets", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager"] },
+  { label: "Tax Management", icon: Receipt, to: "/tax", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager", "accountant"] },
+  { label: "Payroll", icon: DollarSign, to: "/payroll", color: "text-[hsl(var(--success))]", bg: "bg-[hsl(var(--success-light))]", roles: ["owner"] },
+  { label: "Profit & Loss", icon: FileText, to: "/profit-loss", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager", "accountant"] },
 ];
 
 export default function MorePage() {
