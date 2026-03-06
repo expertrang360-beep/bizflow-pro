@@ -61,8 +61,18 @@ export default function MorePage() {
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pt-2">Account</h2>
         <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
           <button
+            onClick={() => navigate("/settings")}
+            className="w-full flex items-center gap-3 px-4 py-4 active:bg-muted transition-colors"
+          >
+            <div className="w-9 h-9 bg-muted rounded-xl flex items-center justify-center">
+              <Settings className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <span className="flex-1 text-sm font-medium text-left">Settings</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button
             onClick={() => signOut()}
-            className="w-full flex items-center gap-3 px-4 py-4 active:bg-muted transition-colors text-destructive"
+            className="w-full flex items-center gap-3 px-4 py-4 active:bg-muted transition-colors text-destructive border-t border-border"
           >
             <div className="w-9 h-9 bg-destructive/10 rounded-xl flex items-center justify-center">
               <LogOut className="w-4 h-4 text-destructive" />

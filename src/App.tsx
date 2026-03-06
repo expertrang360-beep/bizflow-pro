@@ -28,6 +28,7 @@ import TaxPage from "@/pages/TaxPage";
 import PayrollPage from "@/pages/PayrollPage";
 import ProfitLossPage from "@/pages/ProfitLossPage";
 import TeamPage from "@/pages/TeamPage";
+import SettingsPage from "@/pages/SettingsPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -124,6 +125,11 @@ function AppRoutes() {
         <Route path="/team" element={
           <ProtectedRoute allowedRoles={["owner", "manager"]}>
             <TeamPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/settings" element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <SettingsPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />
