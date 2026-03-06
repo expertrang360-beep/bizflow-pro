@@ -27,6 +27,7 @@ import NewAssetPage from "@/pages/NewAssetPage";
 import TaxPage from "@/pages/TaxPage";
 import PayrollPage from "@/pages/PayrollPage";
 import ProfitLossPage from "@/pages/ProfitLossPage";
+import TeamPage from "@/pages/TeamPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -118,6 +119,11 @@ function AppRoutes() {
         <Route path="/profit-loss" element={
           <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
             <ProfitLossPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/team" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <TeamPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />
