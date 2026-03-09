@@ -105,6 +105,7 @@ export default function SettingsPage() {
   useEffect(() => { if (businessName) setNameInput(businessName); }, [businessName]);
   useEffect(() => { if (businessLogo) setLogoInput(businessLogo); }, [businessLogo]);
   useEffect(() => { if (currencyCode) setSelectedCurrency(currencyCode); }, [currencyCode]);
+  useEffect(() => { if (businessType) setSelectedBusinessType(businessType); }, [businessType]);
 
   const saveBranchMutation = useMutation({
     mutationFn: async () => {
