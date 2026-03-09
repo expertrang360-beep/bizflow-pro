@@ -67,12 +67,13 @@ export default function DashboardPage() {
     setLoading(true);
     const today = todayStr();
 
-     const [salesRes, expensesRes, customersRes, suppliersRes, productsRes, deliveryRes] = await Promise.all([
+    const [salesRes, expensesRes, customersRes, suppliersRes, productsRes, deliveryRes] = await Promise.all([
       supabase.from("sales").select("total, payment_type, subtotal, discount, tax, sale_items(qty, price, cost_at_time)").gte("created_at", `${today}T00:00:00`).lte("created_at", `${today}T23:59:59`).neq("status", "cancelled"),
       supabase.from("expenses").select("amount").eq("expense_date", today),
       supabase.from("customers").select("total_credit"),
       supabase.from("suppliers").select("total_payable"),
       supabase.from("products").select("stock_qty, reorder_level").eq("active", true),
+      supabase.from("sales").select("delivered").gte("created_at", `${today}T00:00:00`).lte("created_at", `${today}T23:59:59`).neq("status", "cancelled"),
     ]);
 
     const salesData = salesRes.data || [];
