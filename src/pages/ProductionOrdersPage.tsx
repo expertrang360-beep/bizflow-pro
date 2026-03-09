@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { formatNaira } from "@/lib/bizkit";
 
 type ProductionStatus = "draft" | "in_progress" | "completed" | "cancelled";
 
@@ -25,8 +26,10 @@ interface ProductionOrder {
   actual_end_date: string | null;
   notes: string | null;
   created_at: string;
-  bom?: { name: string };
+  bom?: { name: string; estimated_labor_cost: number; estimated_overhead_cost: number };
   product?: { name: string };
+  production_costs?: { amount: number; cost_type: string }[];
+  production_material_usage?: { total_cost: number }[];
 }
 
 interface BOM {
@@ -65,7 +68,13 @@ export default function ProductionOrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("production_orders")
-        .select("*, bom:bill_of_materials(name), product:products(name)")
+        .select(`
+          *,
+          bom:bill_of_materials(name, estimated_labor_cost, estimated_overhead_cost),
+          product:products(name),
+          production_costs(amount, cost_type),
+          production_material_usage(total_cost)
+        `)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as ProductionOrder[];
@@ -145,6 +154,15 @@ export default function ProductionOrdersPage() {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     },
   });
+
+  const getCostBreakdown = (o: ProductionOrder) => {
+    const materialCost = o.production_material_usage?.reduce((s, m) => s + m.total_cost, 0) || 0;
+    const additionalCosts = o.production_costs?.reduce((s, c) => s + c.amount, 0) || 0;
+    const laborCost = (o.bom?.estimated_labor_cost || 0) * o.quantity;
+    const overheadCost = (o.bom?.estimated_overhead_cost || 0) * o.quantity;
+    const total = materialCost + additionalCosts + laborCost + overheadCost;
+    return { materialCost, laborCost, overheadCost, additionalCosts, total, perUnit: o.quantity > 0 ? total / o.quantity : 0 };
+  };
 
   const filtered = orders.filter((o) =>
     o.bom?.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -240,7 +258,9 @@ export default function ProductionOrdersPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map((o) => (
+            {filtered.map((o) => {
+              const costs = getCostBreakdown(o);
+              return (
               <div key={o.id} className="bg-card rounded-2xl border border-border shadow-card p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -252,6 +272,36 @@ export default function ProductionOrdersPage() {
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Qty: {o.quantity}</span>
                   <span>{format(new Date(o.created_at), "MMM d, yyyy")}</span>
+                </div>
+
+                {/* Cost Breakdown */}
+                <div className="mt-3 bg-muted/50 rounded-xl p-3 space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Materials</span>
+                    <span>{formatNaira(costs.materialCost)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Labor</span>
+                    <span>{formatNaira(costs.laborCost)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Overhead</span>
+                    <span>{formatNaira(costs.overheadCost)}</span>
+                  </div>
+                  {costs.additionalCosts > 0 && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Other Costs</span>
+                      <span>{formatNaira(costs.additionalCosts)}</span>
+                    </div>
+                  )}
+                  <div className="border-t border-border pt-1.5 flex justify-between text-xs font-semibold">
+                    <span>Total</span>
+                    <span>{formatNaira(costs.total)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Cost per unit</span>
+                    <span>{formatNaira(costs.perUnit)}</span>
+                  </div>
                 </div>
                 {canManage && o.status !== "completed" && o.status !== "cancelled" && (
                   <div className="flex gap-2 mt-3">
@@ -285,7 +335,8 @@ export default function ProductionOrdersPage() {
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
