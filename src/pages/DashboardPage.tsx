@@ -22,6 +22,8 @@ interface DashboardStats {
   totalDebtors: number;
   totalPayables: number;
   lowStockCount: number;
+  deliveredCount: number;
+  pendingDeliveryCount: number;
 }
 
 interface MfgStats {
