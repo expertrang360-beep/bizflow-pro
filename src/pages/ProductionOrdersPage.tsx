@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { formatNaira } from "@/lib/bizkit";
 
 type ProductionStatus = "draft" | "in_progress" | "completed" | "cancelled";
 
@@ -25,8 +26,10 @@ interface ProductionOrder {
   actual_end_date: string | null;
   notes: string | null;
   created_at: string;
-  bom?: { name: string };
+  bom?: { name: string; estimated_labor_cost: number; estimated_overhead_cost: number };
   product?: { name: string };
+  production_costs?: { amount: number; cost_type: string }[];
+  production_material_usage?: { total_cost: number }[];
 }
 
 interface BOM {
