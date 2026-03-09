@@ -40,6 +40,7 @@ export default function SalesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [deliveryFilter, setDeliveryFilter] = useState<"all" | "pending" | "delivered">("all");
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDelivering, setBulkDelivering] = useState(false);
@@ -65,7 +66,9 @@ export default function SalesPage() {
 
   const filtered = sales.filter(s => {
     const q = search.toLowerCase();
-    return !q || s.id.includes(q) || s.customers?.name?.toLowerCase().includes(q) || s.payment_type.includes(q);
+    const matchesSearch = !q || s.id.includes(q) || s.customers?.name?.toLowerCase().includes(q) || s.payment_type.includes(q);
+    const matchesDelivery = deliveryFilter === "all" || (deliveryFilter === "delivered" ? s.delivered : !s.delivered);
+    return matchesSearch && matchesDelivery;
   });
 
   const undeliveredFiltered = filtered.filter(s => !s.delivered && s.status !== "cancelled");
@@ -182,6 +185,19 @@ export default function SalesPage() {
               }`}
             >
               {f === "all" ? "All" : paymentIcons[f]} {f}
+            </button>
+          ))}
+          <div className="w-px bg-border flex-shrink-0" />
+          {(["all", "pending", "delivered"] as const).map(d => (
+            <button
+              key={d}
+              onClick={() => setDeliveryFilter(d)}
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors flex items-center gap-1 ${
+                deliveryFilter === d ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {d !== "all" && <Truck className="w-3 h-3" />}
+              {d === "all" ? "All Delivery" : d}
             </button>
           ))}
         </div>
