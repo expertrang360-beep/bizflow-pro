@@ -46,7 +46,9 @@ const DEFAULT_MFG: MfgStats = {
 export default function DashboardPage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isManufacturer } = useBusinessType();
   const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
+  const [mfgStats, setMfgStats] = useState<MfgStats>(DEFAULT_MFG);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
   const [syncStatus, setSyncStatus] = useState<"synced" | "syncing">("synced");
