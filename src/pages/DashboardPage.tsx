@@ -94,8 +94,11 @@ export default function DashboardPage() {
     const totalDebtors = (customersRes.data || []).reduce((s, r) => s + Number(r.total_credit), 0);
     const totalPayables = (suppliersRes.data || []).reduce((s, r) => s + Number(r.total_payable), 0);
     const lowStockCount = (productsRes.data || []).filter(p => Number(p.stock_qty) <= Number(p.reorder_level || 0)).length;
+    const deliveryData = deliveryRes.data || [];
+    const deliveredCount = deliveryData.filter(d => d.delivered).length;
+    const pendingDeliveryCount = deliveryData.filter(d => !d.delivered).length;
 
-    setStats({ todaySales: totalSales, todayExpenses: totalExpenses, todayProfit, cashSales, transferSales, posSales, creditSales, totalDebtors, totalPayables, lowStockCount });
+    setStats({ todaySales: totalSales, todayExpenses: totalExpenses, todayProfit, cashSales, transferSales, posSales, creditSales, totalDebtors, totalPayables, lowStockCount, deliveredCount, pendingDeliveryCount });
 
     // Fetch manufacturer stats
     const [dailyLogsRes, rawMatsRes, activeOrdersRes] = await Promise.all([
