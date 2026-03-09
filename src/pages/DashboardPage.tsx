@@ -301,6 +301,13 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+          {weekChange !== null && (
+            <div className={`flex items-center gap-1 mb-2 ${weekChange >= 0 ? "text-accent" : "text-destructive"}`}>
+              {weekChange >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+              <span className="text-xs font-semibold">{weekChange >= 0 ? "+" : ""}{weekChange.toFixed(1)}%</span>
+              <span className="text-xs text-muted-foreground ml-0.5">vs last week</span>
+            </div>
+          )}
           {trendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={trendData} barSize={24}>
