@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatNaira, todayStr } from "@/lib/bizkit";
+import { useBusinessType } from "@/hooks/useBusinessType";
 import {
   TrendingUp, TrendingDown, ShoppingCart, Package, Users,
   Truck, Plus, ArrowRight, Wallet, CreditCard, AlertCircle,
-  RefreshCw
+  RefreshCw, Factory, Boxes, ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
