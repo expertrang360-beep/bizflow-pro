@@ -12,6 +12,7 @@ import NewSalePage from "@/pages/NewSalePage";
 import SaleDetailPage from "@/pages/SaleDetailPage";
 import InventoryPage from "@/pages/InventoryPage";
 import NewProductPage from "@/pages/NewProductPage";
+import ProductDetailPage from "@/pages/ProductDetailPage";
 import ReportsPage from "@/pages/ReportsPage";
 import MorePage from "@/pages/MorePage";
 import ExpensesPage from "@/pages/ExpensesPage";
@@ -68,6 +69,11 @@ function AppRoutes() {
         <Route path="/inventory/new" element={
           <ProtectedRoute allowedRoles={["owner", "manager"]}>
             <NewProductPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/inventory/:id" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductDetailPage />
           </ProtectedRoute>
         } />
         <Route path="/reports" element={
