@@ -258,7 +258,9 @@ export default function ProductionOrdersPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map((o) => (
+            {filtered.map((o) => {
+              const costs = getCostBreakdown(o);
+              return (
               <div key={o.id} className="bg-card rounded-2xl border border-border shadow-card p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -270,6 +272,36 @@ export default function ProductionOrdersPage() {
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Qty: {o.quantity}</span>
                   <span>{format(new Date(o.created_at), "MMM d, yyyy")}</span>
+                </div>
+
+                {/* Cost Breakdown */}
+                <div className="mt-3 bg-muted/50 rounded-xl p-3 space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Materials</span>
+                    <span>{formatNaira(costs.materialCost)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Labor</span>
+                    <span>{formatNaira(costs.laborCost)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Overhead</span>
+                    <span>{formatNaira(costs.overheadCost)}</span>
+                  </div>
+                  {costs.additionalCosts > 0 && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Other Costs</span>
+                      <span>{formatNaira(costs.additionalCosts)}</span>
+                    </div>
+                  )}
+                  <div className="border-t border-border pt-1.5 flex justify-between text-xs font-semibold">
+                    <span>Total</span>
+                    <span>{formatNaira(costs.total)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Cost per unit</span>
+                    <span>{formatNaira(costs.perUnit)}</span>
+                  </div>
                 </div>
                 {canManage && o.status !== "completed" && o.status !== "cancelled" && (
                   <div className="flex gap-2 mt-3">
