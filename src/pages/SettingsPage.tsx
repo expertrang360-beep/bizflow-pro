@@ -78,6 +78,7 @@ export default function SettingsPage() {
   const { data: businessName } = useSetting("business_name");
   const { data: businessLogo } = useSetting("business_logo");
   const { data: currencyCode } = useSetting("currency");
+  const { data: businessType } = useSetting("business_type");
   const upsertSetting = useUpsertSetting();
 
   const [nameInput, setNameInput] = useState("");
