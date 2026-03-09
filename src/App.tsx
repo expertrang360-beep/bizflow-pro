@@ -29,6 +29,10 @@ import PayrollPage from "@/pages/PayrollPage";
 import ProfitLossPage from "@/pages/ProfitLossPage";
 import TeamPage from "@/pages/TeamPage";
 import SettingsPage from "@/pages/SettingsPage";
+import RawMaterialsPage from "@/pages/RawMaterialsPage";
+import BOMPage from "@/pages/BOMPage";
+import ProductionOrdersPage from "@/pages/ProductionOrdersPage";
+import ProductionCostsPage from "@/pages/ProductionCostsPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
