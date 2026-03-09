@@ -219,6 +219,28 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Delivery Summary */}
+        <button
+          onClick={() => navigate("/sales")}
+          className="w-full bg-card rounded-2xl border border-border shadow-card p-4 text-left active:scale-95 transition-transform"
+        >
+          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Truck className="w-4 h-4 text-primary" />
+            Today's Deliveries
+            <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto" />
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-warning/10 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-warning">{stats.pendingDeliveryCount}</p>
+              <p className="text-xs text-warning/80 font-medium">Pending</p>
+            </div>
+            <div className="bg-accent/10 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-accent">{stats.deliveredCount}</p>
+              <p className="text-xs text-accent/80 font-medium">Delivered</p>
+            </div>
+          </div>
+        </button>
+
         {/* Manufacturing Widget */}
         {isManufacturer && (
           <div className="bg-card rounded-2xl border border-border shadow-card p-4 space-y-3">
