@@ -35,10 +35,12 @@ const menuItems: MenuItem[] = [
 export default function MorePage() {
   const navigate = useNavigate();
   const { user, signOut, hasAnyRole, roles } = useAuth();
+  const { isManufacturer } = useBusinessType();
 
-  const visibleMenuItems = menuItems.filter(
-    (item) => !item.roles || roles.length === 0 || hasAnyRole(item.roles)
-  );
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (item.manufacturerOnly && !isManufacturer) return false;
+    return !item.roles || roles.length === 0 || hasAnyRole(item.roles);
+  });
 
   const userName = user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
 

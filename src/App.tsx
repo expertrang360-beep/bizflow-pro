@@ -136,6 +136,26 @@ function AppRoutes() {
             <SettingsPage />
           </ProtectedRoute>
         } />
+        <Route path="/raw-materials" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <RawMaterialsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/bom" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <BOMPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/production-orders" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductionOrdersPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/production-costs" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductionCostsPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
