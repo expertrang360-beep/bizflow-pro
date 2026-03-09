@@ -58,6 +58,7 @@ export default function DashboardPage() {
   const [syncStatus, setSyncStatus] = useState<"synced" | "syncing">("synced");
   const [trendData, setTrendData] = useState<{ day: string; count: number; total: number }[]>([]);
   const [trendMode, setTrendMode] = useState<"count" | "revenue">("count");
+  const [weekChange, setWeekChange] = useState<number | null>(null);
 
   useEffect(() => {
     const h = new Date().getHours();
