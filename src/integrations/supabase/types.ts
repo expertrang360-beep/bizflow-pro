@@ -194,6 +194,99 @@ export type Database = {
         }
         Relationships: []
       }
+      bill_of_materials: {
+        Row: {
+          active: boolean
+          branch_id: string | null
+          created_at: string
+          description: string | null
+          estimated_labor_cost: number
+          estimated_overhead_cost: number
+          id: string
+          name: string
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          branch_id?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_labor_cost?: number
+          estimated_overhead_cost?: number
+          id?: string
+          name: string
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          branch_id?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_labor_cost?: number
+          estimated_overhead_cost?: number
+          id?: string
+          name?: string
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bill_of_materials_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_of_materials_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bom_items: {
+        Row: {
+          bom_id: string
+          created_at: string
+          id: string
+          quantity: number
+          raw_material_id: string
+        }
+        Insert: {
+          bom_id: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          raw_material_id: string
+        }
+        Update: {
+          bom_id?: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          raw_material_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bom_items_bom_id_fkey"
+            columns: ["bom_id"]
+            isOneToOne: false
+            referencedRelation: "bill_of_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bom_items_raw_material_id_fkey"
+            columns: ["raw_material_id"]
+            isOneToOne: false
+            referencedRelation: "raw_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branches: {
         Row: {
           address: string | null
@@ -568,6 +661,162 @@ export type Database = {
           },
         ]
       }
+      production_costs: {
+        Row: {
+          amount: number
+          cost_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          production_order_id: string
+        }
+        Insert: {
+          amount?: number
+          cost_type: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          production_order_id: string
+        }
+        Update: {
+          amount?: number
+          cost_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          production_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_costs_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_material_usage: {
+        Row: {
+          created_at: string
+          id: string
+          production_order_id: string
+          quantity_used: number
+          raw_material_id: string
+          total_cost: number
+          unit_cost: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          production_order_id: string
+          quantity_used?: number
+          raw_material_id: string
+          total_cost?: number
+          unit_cost?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          production_order_id?: string
+          quantity_used?: number
+          raw_material_id?: string
+          total_cost?: number
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_material_usage_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_material_usage_raw_material_id_fkey"
+            columns: ["raw_material_id"]
+            isOneToOne: false
+            referencedRelation: "raw_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_orders: {
+        Row: {
+          actual_end_date: string | null
+          actual_start_date: string | null
+          bom_id: string
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          planned_end_date: string | null
+          planned_start_date: string | null
+          product_id: string
+          quantity: number
+          status: Database["public"]["Enums"]["production_status"]
+          updated_at: string
+        }
+        Insert: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          bom_id: string
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
+          product_id: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["production_status"]
+          updated_at?: string
+        }
+        Update: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          bom_id?: string
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
+          product_id?: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["production_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_orders_bom_id_fkey"
+            columns: ["bom_id"]
+            isOneToOne: false
+            referencedRelation: "bill_of_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_orders_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean
@@ -754,6 +1003,59 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raw_materials: {
+        Row: {
+          active: boolean
+          branch_id: string | null
+          category: string | null
+          cost_price: number
+          created_at: string
+          id: string
+          name: string
+          reorder_level: number | null
+          sku: string | null
+          stock_qty: number
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          branch_id?: string | null
+          category?: string | null
+          cost_price?: number
+          created_at?: string
+          id?: string
+          name: string
+          reorder_level?: number | null
+          sku?: string | null
+          stock_qty?: number
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          branch_id?: string | null
+          category?: string | null
+          cost_price?: number
+          created_at?: string
+          id?: string
+          name?: string
+          reorder_level?: number | null
+          sku?: string | null
+          stock_qty?: number
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raw_materials_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
             referencedColumns: ["id"]
           },
         ]
@@ -1148,10 +1450,12 @@ export type Database = {
     Enums: {
       app_role: "owner" | "manager" | "cashier" | "accountant"
       asset_status: "active" | "disposed" | "maintenance" | "retired"
+      business_type: "trader" | "manufacturer"
       cashbook_direction: "in" | "out"
       depreciation_method: "straight_line" | "declining_balance"
       payment_type: "cash" | "transfer" | "pos" | "credit"
       payroll_status: "draft" | "approved" | "paid"
+      production_status: "draft" | "in_progress" | "completed" | "cancelled"
       purchase_status: "paid" | "partial" | "unpaid"
       sale_status: "completed" | "credit" | "partial" | "cancelled"
       tax_period_status: "open" | "filed" | "paid"
@@ -1285,10 +1589,12 @@ export const Constants = {
     Enums: {
       app_role: ["owner", "manager", "cashier", "accountant"],
       asset_status: ["active", "disposed", "maintenance", "retired"],
+      business_type: ["trader", "manufacturer"],
       cashbook_direction: ["in", "out"],
       depreciation_method: ["straight_line", "declining_balance"],
       payment_type: ["cash", "transfer", "pos", "credit"],
       payroll_status: ["draft", "approved", "paid"],
+      production_status: ["draft", "in_progress", "completed", "cancelled"],
       purchase_status: ["paid", "partial", "unpaid"],
       sale_status: ["completed", "credit", "partial", "cancelled"],
       tax_period_status: ["open", "filed", "paid"],
