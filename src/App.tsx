@@ -157,6 +157,11 @@ function AppRoutes() {
             <ProductionCostsPage />
           </ProtectedRoute>
         } />
+        <Route path="/production-costs/:id" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductionCostDetailPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
