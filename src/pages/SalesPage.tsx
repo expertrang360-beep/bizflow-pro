@@ -66,7 +66,9 @@ export default function SalesPage() {
 
   const filtered = sales.filter(s => {
     const q = search.toLowerCase();
-    return !q || s.id.includes(q) || s.customers?.name?.toLowerCase().includes(q) || s.payment_type.includes(q);
+    const matchesSearch = !q || s.id.includes(q) || s.customers?.name?.toLowerCase().includes(q) || s.payment_type.includes(q);
+    const matchesDelivery = deliveryFilter === "all" || (deliveryFilter === "delivered" ? s.delivered : !s.delivered);
+    return matchesSearch && matchesDelivery;
   });
 
   const undeliveredFiltered = filtered.filter(s => !s.delivered && s.status !== "cancelled");
