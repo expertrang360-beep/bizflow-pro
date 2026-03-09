@@ -269,6 +269,32 @@ export default function DashboardPage() {
           </div>
         </button>
 
+        {/* 7-Day Sales Trend */}
+        <div className="bg-card rounded-2xl border border-border shadow-card p-4">
+          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-primary" />
+            Sales Trend (Last 7 Days)
+          </h2>
+          {trendData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={trendData} barSize={24}>
+                <XAxis dataKey="day" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} className="fill-muted-foreground" />
+                <YAxis hide />
+                <Tooltip
+                  formatter={(value: number) => [value, "Sales"]}
+                  contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", fontSize: 12 }}
+                  cursor={{ fill: "hsl(var(--muted))", radius: 8 }}
+                />
+                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[160px] flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">No data yet</p>
+            </div>
+          )}
+        </div>
+
         {/* Manufacturing Widget */}
         {isManufacturer && (
           <div className="bg-card rounded-2xl border border-border shadow-card p-4 space-y-3">
