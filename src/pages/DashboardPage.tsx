@@ -57,6 +57,7 @@ export default function DashboardPage() {
   const [greeting, setGreeting] = useState("");
   const [syncStatus, setSyncStatus] = useState<"synced" | "syncing">("synced");
   const [trendData, setTrendData] = useState<{ day: string; count: number; total: number }[]>([]);
+  const [trendMode, setTrendMode] = useState<"count" | "revenue">("count");
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -271,21 +272,37 @@ export default function DashboardPage() {
 
         {/* 7-Day Sales Trend */}
         <div className="bg-card rounded-2xl border border-border shadow-card p-4">
-          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-primary" />
-            Sales Trend (Last 7 Days)
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              Sales Trend (7 Days)
+            </h2>
+            <div className="flex bg-muted rounded-lg p-0.5 text-xs">
+              <button
+                onClick={() => setTrendMode("count")}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${trendMode === "count" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+              >
+                Count
+              </button>
+              <button
+                onClick={() => setTrendMode("revenue")}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${trendMode === "revenue" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+              >
+                Revenue
+              </button>
+            </div>
+          </div>
           {trendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={trendData} barSize={24}>
                 <XAxis dataKey="day" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} className="fill-muted-foreground" />
                 <YAxis hide />
                 <Tooltip
-                  formatter={(value: number) => [value, "Sales"]}
+                  formatter={(value: number) => [trendMode === "revenue" ? formatNaira(value) : value, trendMode === "revenue" ? "Revenue" : "Sales"]}
                   contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", fontSize: 12 }}
                   cursor={{ fill: "hsl(var(--muted))", radius: 8 }}
                 />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                <Bar dataKey={trendMode === "revenue" ? "total" : "count"} fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
