@@ -103,7 +103,7 @@ export default function DailyProductionPage() {
         .single();
       if (logError) throw logError;
 
-      // Insert material usage entries
+      // Insert material usage entries and deduct raw material stock
       const materialsToInsert = form.materials.filter((m) => m.raw_material_id && m.quantity_used > 0);
       if (materialsToInsert.length > 0) {
         const { error: matError } = await supabase.from("daily_material_usage").insert(
@@ -114,10 +114,22 @@ export default function DailyProductionPage() {
           }))
         );
         if (matError) throw matError;
+
+        // Deduct raw material stock atomically
+        for (const m of materialsToInsert) {
+          const { error: stockErr } = await supabase.rpc("update_raw_material_stock_atomic", {
+            p_material_id: m.raw_material_id,
+            p_quantity_delta: -m.quantity_used,
+          });
+          if (stockErr) {
+            const matName = rawMaterials.find((rm) => rm.id === m.raw_material_id)?.name || "Unknown";
+            throw new Error(`Insufficient stock for ${matName}: ${stockErr.message}`);
+          }
+        }
       }
     },
     onSuccess: () => {
-      toast({ title: "Daily record saved" });
+      toast({ title: "Daily record saved", description: "Raw material stock updated" });
       setDialogOpen(false);
       setForm({ log_date: todayStr, product_id: "", quantity_produced: "", quantity_packaged: "", quantity_unpackaged: "", notes: "", materials: [] });
       queryClient.invalidateQueries({ queryKey: ["daily-production-logs"] });

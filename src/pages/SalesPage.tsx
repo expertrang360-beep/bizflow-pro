@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNaira, formatDateTime, DEFAULT_BRANCH_ID } from "@/lib/bizkit";
-import { Plus, Search, Filter, ChevronRight, Check, Clock } from "lucide-react";
+import { Plus, Search, Filter, ChevronRight, Check, Clock, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ interface Sale {
   amount_paid: number;
   created_at: string;
   customer_id: string | null;
+  delivered: boolean;
   customers?: { name: string } | null;
 }
 
@@ -140,6 +141,15 @@ export default function SalesPage() {
                     <span className={`text-2xs px-2 py-0.5 rounded-full capitalize ${statusColors[sale.status] || "bg-muted text-muted-foreground"}`}>
                       {sale.status}
                     </span>
+                    {sale.delivered ? (
+                      <span className="text-2xs px-2 py-0.5 rounded-full badge-success flex items-center gap-0.5">
+                        <Truck className="w-2.5 h-2.5" /> Delivered
+                      </span>
+                    ) : (
+                      <span className="text-2xs px-2 py-0.5 rounded-full bg-warning/10 text-warning">
+                        Pending
+                      </span>
+                    )}
                     <span className="text-2xs text-muted-foreground">{formatDateTime(sale.created_at)}</span>
                   </div>
                 </div>
