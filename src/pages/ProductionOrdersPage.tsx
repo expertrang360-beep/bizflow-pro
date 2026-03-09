@@ -155,6 +155,15 @@ export default function ProductionOrdersPage() {
     },
   });
 
+  const getCostBreakdown = (o: ProductionOrder) => {
+    const materialCost = o.production_material_usage?.reduce((s, m) => s + m.total_cost, 0) || 0;
+    const additionalCosts = o.production_costs?.reduce((s, c) => s + c.amount, 0) || 0;
+    const laborCost = (o.bom?.estimated_labor_cost || 0) * o.quantity;
+    const overheadCost = (o.bom?.estimated_overhead_cost || 0) * o.quantity;
+    const total = materialCost + additionalCosts + laborCost + overheadCost;
+    return { materialCost, laborCost, overheadCost, additionalCosts, total, perUnit: o.quantity > 0 ? total / o.quantity : 0 };
+  };
+
   const filtered = orders.filter((o) =>
     o.bom?.name.toLowerCase().includes(search.toLowerCase()) ||
     o.product?.name.toLowerCase().includes(search.toLowerCase())
