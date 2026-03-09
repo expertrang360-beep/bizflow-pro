@@ -1422,6 +1422,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_production_order: { Args: { p_order_id: string }; Returns: Json }
       get_user_branch: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
