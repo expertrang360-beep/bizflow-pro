@@ -68,7 +68,13 @@ export default function ProductionOrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("production_orders")
-        .select("*, bom:bill_of_materials(name), product:products(name)")
+        .select(`
+          *,
+          bom:bill_of_materials(name, estimated_labor_cost, estimated_overhead_cost),
+          product:products(name),
+          production_costs(amount, cost_type),
+          production_material_usage(total_cost)
+        `)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as ProductionOrder[];
