@@ -3,8 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNaira, formatDateTime } from "@/lib/bizkit";
 import { downloadReceipt, shareReceipt, type ReceiptData } from "@/lib/receipt-pdf";
-import { ArrowLeft, Download, Share2 } from "lucide-react";
+import { ArrowLeft, Download, Share2, Truck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface SaleDetail {
   id: string;
@@ -17,6 +19,8 @@ interface SaleDetail {
   status: string;
   note: string | null;
   created_at: string;
+  delivered: boolean;
+  delivered_at: string | null;
   customers: { name: string } | null;
 }
 
@@ -31,9 +35,14 @@ interface SaleItem {
 export default function SaleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { hasAnyRole } = useAuth();
+  const { toast } = useToast();
   const [sale, setSale] = useState<SaleDetail | null>(null);
   const [items, setItems] = useState<SaleItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [delivering, setDelivering] = useState(false);
+
+  const canDeliver = hasAnyRole(["owner", "manager", "cashier"]);
 
   useEffect(() => {
     if (!id) return;
@@ -46,6 +55,25 @@ export default function SaleDetailPage() {
       setLoading(false);
     });
   }, [id]);
+
+  const handleMarkDelivered = async () => {
+    if (!sale || !id) return;
+    setDelivering(true);
+    try {
+      const { error } = await supabase
+        .from("sales")
+        .update({ delivered: true, delivered_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+
+      setSale({ ...sale, delivered: true, delivered_at: new Date().toISOString() });
+      toast({ title: "Marked as delivered 🚚", description: "Products have left the warehouse" });
+    } catch (err) {
+      toast({ title: "Error", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setDelivering(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -103,6 +131,30 @@ export default function SaleDetailPage() {
       </div>
 
       <div className="flex-1 px-4 py-4 space-y-4">
+        {/* Delivery Status */}
+        <div className={`rounded-xl border p-4 flex items-center gap-3 ${sale.delivered ? "bg-[hsl(var(--success-light))] border-[hsl(var(--success))]/30" : "bg-warning/10 border-warning/30"}`}>
+          <Truck className={`w-5 h-5 flex-shrink-0 ${sale.delivered ? "text-[hsl(var(--success))]" : "text-warning"}`} />
+          <div className="flex-1">
+            <p className={`text-sm font-semibold ${sale.delivered ? "text-[hsl(var(--success))]" : "text-warning"}`}>
+              {sale.delivered ? "Delivered" : "Pending Delivery"}
+            </p>
+            {sale.delivered && sale.delivered_at && (
+              <p className="text-xs text-muted-foreground">{formatDateTime(sale.delivered_at)}</p>
+            )}
+          </div>
+          {!sale.delivered && canDeliver && sale.status !== "cancelled" && (
+            <Button
+              size="sm"
+              onClick={handleMarkDelivered}
+              disabled={delivering}
+              className="gap-1"
+            >
+              <Check className="w-3 h-3" />
+              {delivering ? "..." : "Deliver"}
+            </Button>
+          )}
+        </div>
+
         {/* Items */}
         <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
