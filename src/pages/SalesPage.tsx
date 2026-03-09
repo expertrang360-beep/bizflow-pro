@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNaira, formatDateTime, DEFAULT_BRANCH_ID } from "@/lib/bizkit";
-import { Plus, Search, Filter, ChevronRight, Check, Clock } from "lucide-react";
+import { Plus, Search, Filter, ChevronRight, Check, Clock, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
