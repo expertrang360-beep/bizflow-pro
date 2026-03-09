@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessType } from "@/hooks/useBusinessType";
-import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound, Package, FileStack, Factory, Calculator } from "lucide-react";
+import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound, Package, FileStack, Factory, Calculator, ClipboardList } from "lucide-react";
 
 type AppRole = "owner" | "manager" | "cashier" | "accountant";
 
@@ -30,6 +30,7 @@ const menuItems: MenuItem[] = [
   { label: "Bill of Materials", icon: FileStack, to: "/bom", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager"], manufacturerOnly: true },
   { label: "Production Orders", icon: Factory, to: "/production-orders", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager"], manufacturerOnly: true },
   { label: "Production Costs", icon: Calculator, to: "/production-costs", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Daily Production Log", icon: ClipboardList, to: "/daily-production", color: "text-[hsl(var(--success))]", bg: "bg-[hsl(var(--success-light))]", manufacturerOnly: true },
 ];
 
 export default function MorePage() {

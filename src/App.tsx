@@ -34,6 +34,7 @@ import BOMPage from "@/pages/BOMPage";
 import ProductionOrdersPage from "@/pages/ProductionOrdersPage";
 import ProductionCostsPage from "@/pages/ProductionCostsPage";
 import ProductionCostDetailPage from "@/pages/ProductionCostDetailPage";
+import DailyProductionPage from "@/pages/DailyProductionPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -162,6 +163,7 @@ function AppRoutes() {
             <ProductionCostDetailPage />
           </ProtectedRoute>
         } />
+        <Route path="/daily-production" element={<DailyProductionPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

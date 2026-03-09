@@ -399,6 +399,102 @@ export type Database = {
           },
         ]
       }
+      daily_material_usage: {
+        Row: {
+          created_at: string
+          daily_log_id: string
+          id: string
+          quantity_used: number
+          raw_material_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_log_id: string
+          id?: string
+          quantity_used?: number
+          raw_material_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_log_id?: string
+          id?: string
+          quantity_used?: number
+          raw_material_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_material_usage_daily_log_id_fkey"
+            columns: ["daily_log_id"]
+            isOneToOne: false
+            referencedRelation: "daily_production_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_material_usage_raw_material_id_fkey"
+            columns: ["raw_material_id"]
+            isOneToOne: false
+            referencedRelation: "raw_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_production_logs: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          log_date: string
+          notes: string | null
+          product_id: string
+          quantity_packaged: number
+          quantity_produced: number
+          quantity_unpackaged: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          log_date?: string
+          notes?: string | null
+          product_id: string
+          quantity_packaged?: number
+          quantity_produced?: number
+          quantity_unpackaged?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          log_date?: string
+          notes?: string | null
+          product_id?: string
+          quantity_packaged?: number
+          quantity_produced?: number
+          quantity_unpackaged?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_production_logs_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_production_logs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       debt_payments: {
         Row: {
           amount: number
