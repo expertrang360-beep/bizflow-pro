@@ -30,6 +30,7 @@ const menuItems: MenuItem[] = [
   { label: "Bill of Materials", icon: FileStack, to: "/bom", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager"], manufacturerOnly: true },
   { label: "Production Orders", icon: Factory, to: "/production-orders", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager"], manufacturerOnly: true },
   { label: "Production Costs", icon: Calculator, to: "/production-costs", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Daily Production Log", icon: ClipboardList, to: "/daily-production", color: "text-[hsl(var(--success))]", bg: "bg-[hsl(var(--success-light))]", manufacturerOnly: true },
 ];
 
 export default function MorePage() {
