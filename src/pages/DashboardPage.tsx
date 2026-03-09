@@ -58,6 +58,7 @@ export default function DashboardPage() {
   const [syncStatus, setSyncStatus] = useState<"synced" | "syncing">("synced");
   const [trendData, setTrendData] = useState<{ day: string; count: number; total: number }[]>([]);
   const [trendMode, setTrendMode] = useState<"count" | "revenue">("count");
+  const [weekChange, setWeekChange] = useState<number | null>(null);
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -129,11 +130,15 @@ export default function DashboardPage() {
       days.push({ day: label, date: iso });
     }
     const sevenDaysAgo = days[0].date;
-    const trendRes = await supabase
-      .from("sales")
-      .select("created_at, total")
-      .gte("created_at", `${sevenDaysAgo}T00:00:00`)
-      .neq("status", "cancelled");
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
+    const prevWeekStart = fourteenDaysAgo.toISOString().slice(0, 10);
+
+    const [trendRes, prevWeekRes] = await Promise.all([
+      supabase.from("sales").select("created_at, total").gte("created_at", `${sevenDaysAgo}T00:00:00`).neq("status", "cancelled"),
+      supabase.from("sales").select("total").gte("created_at", `${prevWeekStart}T00:00:00`).lt("created_at", `${sevenDaysAgo}T00:00:00`).neq("status", "cancelled"),
+    ]);
+
     const trendSales = trendRes.data || [];
     const trendMap = new Map<string, { count: number; total: number }>();
     for (const d of days) trendMap.set(d.date, { count: 0, total: 0 });
@@ -143,6 +148,10 @@ export default function DashboardPage() {
       if (entry) { entry.count++; entry.total += Number(s.total); }
     }
     setTrendData(days.map(d => ({ day: d.day, ...trendMap.get(d.date)! })));
+
+    const thisWeekTotal = trendSales.reduce((s, r) => s + Number(r.total), 0);
+    const lastWeekTotal = (prevWeekRes.data || []).reduce((s, r) => s + Number(r.total), 0);
+    setWeekChange(lastWeekTotal > 0 ? ((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100 : thisWeekTotal > 0 ? 100 : 0);
 
     setLoading(false);
     setSyncStatus("synced");
@@ -292,6 +301,13 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+          {weekChange !== null && (
+            <div className={`flex items-center gap-1 mb-2 ${weekChange >= 0 ? "text-accent" : "text-destructive"}`}>
+              {weekChange >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+              <span className="text-xs font-semibold">{weekChange >= 0 ? "+" : ""}{weekChange.toFixed(1)}%</span>
+              <span className="text-xs text-muted-foreground ml-0.5">vs last week</span>
+            </div>
+          )}
           {trendData.length > 0 ? (
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={trendData} barSize={24}>
