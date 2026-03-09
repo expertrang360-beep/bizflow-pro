@@ -117,6 +117,32 @@ export default function DashboardPage() {
     const activeOrderCount = (activeOrdersRes.data || []).length;
 
     setMfgStats({ todayProduced, todayPackaged, todayUnpackaged, lowRawMaterialCount, activeOrderCount });
+
+    // Fetch 7-day sales trend
+    const days: { day: string; date: string }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString("en", { weekday: "short" });
+      days.push({ day: label, date: iso });
+    }
+    const sevenDaysAgo = days[0].date;
+    const trendRes = await supabase
+      .from("sales")
+      .select("created_at, total")
+      .gte("created_at", `${sevenDaysAgo}T00:00:00`)
+      .neq("status", "cancelled");
+    const trendSales = trendRes.data || [];
+    const trendMap = new Map<string, { count: number; total: number }>();
+    for (const d of days) trendMap.set(d.date, { count: 0, total: 0 });
+    for (const s of trendSales) {
+      const dateKey = s.created_at.slice(0, 10);
+      const entry = trendMap.get(dateKey);
+      if (entry) { entry.count++; entry.total += Number(s.total); }
+    }
+    setTrendData(days.map(d => ({ day: d.day, ...trendMap.get(d.date)! })));
+
     setLoading(false);
     setSyncStatus("synced");
   };
