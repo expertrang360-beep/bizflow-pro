@@ -40,6 +40,7 @@ export default function SalesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [deliveryFilter, setDeliveryFilter] = useState<"all" | "pending" | "delivered">("all");
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDelivering, setBulkDelivering] = useState(false);
