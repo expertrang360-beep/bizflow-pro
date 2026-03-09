@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatNaira, todayStr } from "@/lib/bizkit";
+import { useBusinessType } from "@/hooks/useBusinessType";
 import {
   TrendingUp, TrendingDown, ShoppingCart, Package, Users,
   Truck, Plus, ArrowRight, Wallet, CreditCard, AlertCircle,
-  RefreshCw
+  RefreshCw, Factory, Boxes, ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -23,16 +24,31 @@ interface DashboardStats {
   lowStockCount: number;
 }
 
+interface MfgStats {
+  todayProduced: number;
+  todayPackaged: number;
+  todayUnpackaged: number;
+  lowRawMaterialCount: number;
+  activeOrderCount: number;
+}
+
 const DEFAULT_STATS: DashboardStats = {
   todaySales: 0, todayExpenses: 0, todayProfit: 0,
   cashSales: 0, transferSales: 0, posSales: 0, creditSales: 0,
   totalDebtors: 0, totalPayables: 0, lowStockCount: 0,
 };
 
+const DEFAULT_MFG: MfgStats = {
+  todayProduced: 0, todayPackaged: 0, todayUnpackaged: 0,
+  lowRawMaterialCount: 0, activeOrderCount: 0,
+};
+
 export default function DashboardPage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isManufacturer } = useBusinessType();
   const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
+  const [mfgStats, setMfgStats] = useState<MfgStats>(DEFAULT_MFG);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
   const [syncStatus, setSyncStatus] = useState<"synced" | "syncing">("synced");
@@ -76,6 +92,22 @@ export default function DashboardPage() {
     const lowStockCount = (productsRes.data || []).filter(p => Number(p.stock_qty) <= Number(p.reorder_level || 0)).length;
 
     setStats({ todaySales: totalSales, todayExpenses: totalExpenses, todayProfit, cashSales, transferSales, posSales, creditSales, totalDebtors, totalPayables, lowStockCount });
+
+    // Fetch manufacturer stats
+    const [dailyLogsRes, rawMatsRes, activeOrdersRes] = await Promise.all([
+      supabase.from("daily_production_logs").select("quantity_produced, quantity_packaged, quantity_unpackaged").eq("log_date", today),
+      supabase.from("raw_materials").select("stock_qty, reorder_level").eq("active", true),
+      supabase.from("production_orders").select("id").in("status", ["draft", "in_progress"]),
+    ]);
+
+    const logs = dailyLogsRes.data || [];
+    const todayProduced = logs.reduce((s, r) => s + Number(r.quantity_produced), 0);
+    const todayPackaged = logs.reduce((s, r) => s + Number(r.quantity_packaged), 0);
+    const todayUnpackaged = logs.reduce((s, r) => s + Number(r.quantity_unpackaged), 0);
+    const lowRawMaterialCount = (rawMatsRes.data || []).filter(m => Number(m.stock_qty) <= Number(m.reorder_level || 0)).length;
+    const activeOrderCount = (activeOrdersRes.data || []).length;
+
+    setMfgStats({ todayProduced, todayPackaged, todayUnpackaged, lowRawMaterialCount, activeOrderCount });
     setLoading(false);
     setSyncStatus("synced");
   };
@@ -179,6 +211,56 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* Manufacturing Widget */}
+        {isManufacturer && (
+          <div className="bg-card rounded-2xl border border-border shadow-card p-4 space-y-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <Factory className="w-4 h-4 text-primary" />
+              Today's Production
+            </h2>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Produced", value: mfgStats.todayProduced, icon: "🏭" },
+                { label: "Packaged", value: mfgStats.todayPackaged, icon: "📦" },
+                { label: "Unpackaged", value: mfgStats.todayUnpackaged, icon: "📋" },
+              ].map(({ label, value, icon }) => (
+                <div key={label} className="bg-muted/50 rounded-xl p-3 text-center">
+                  <span className="text-lg">{icon}</span>
+                  <p className="text-lg font-bold text-foreground">{value}</p>
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {mfgStats.lowRawMaterialCount > 0 && (
+                <button
+                  onClick={() => navigate("/raw-materials")}
+                  className="flex items-center gap-2 bg-warning/10 border border-warning/30 rounded-xl p-3 active:scale-95 transition-transform"
+                >
+                  <Boxes className="w-4 h-4 text-warning flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-warning">{mfgStats.lowRawMaterialCount} Low</p>
+                    <p className="text-xs text-warning/70">Raw Materials</p>
+                  </div>
+                </button>
+              )}
+              {mfgStats.activeOrderCount > 0 && (
+                <button
+                  onClick={() => navigate("/production-orders")}
+                  className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-xl p-3 active:scale-95 transition-transform"
+                >
+                  <ClipboardList className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-primary">{mfgStats.activeOrderCount} Active</p>
+                    <p className="text-xs text-primary/70">Prod. Orders</p>
+                  </div>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Alerts row */}
         <div className="grid grid-cols-2 gap-3">
