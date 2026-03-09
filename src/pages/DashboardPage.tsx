@@ -92,6 +92,22 @@ export default function DashboardPage() {
     const lowStockCount = (productsRes.data || []).filter(p => Number(p.stock_qty) <= Number(p.reorder_level || 0)).length;
 
     setStats({ todaySales: totalSales, todayExpenses: totalExpenses, todayProfit, cashSales, transferSales, posSales, creditSales, totalDebtors, totalPayables, lowStockCount });
+
+    // Fetch manufacturer stats
+    const [dailyLogsRes, rawMatsRes, activeOrdersRes] = await Promise.all([
+      supabase.from("daily_production_logs").select("quantity_produced, quantity_packaged, quantity_unpackaged").eq("log_date", today),
+      supabase.from("raw_materials").select("stock_qty, reorder_level").eq("active", true),
+      supabase.from("production_orders").select("id").in("status", ["draft", "in_progress"]),
+    ]);
+
+    const logs = dailyLogsRes.data || [];
+    const todayProduced = logs.reduce((s, r) => s + Number(r.quantity_produced), 0);
+    const todayPackaged = logs.reduce((s, r) => s + Number(r.quantity_packaged), 0);
+    const todayUnpackaged = logs.reduce((s, r) => s + Number(r.quantity_unpackaged), 0);
+    const lowRawMaterialCount = (rawMatsRes.data || []).filter(m => Number(m.stock_qty) <= Number(m.reorder_level || 0)).length;
+    const activeOrderCount = (activeOrdersRes.data || []).length;
+
+    setMfgStats({ todayProduced, todayPackaged, todayUnpackaged, lowRawMaterialCount, activeOrderCount });
     setLoading(false);
     setSyncStatus("synced");
   };
