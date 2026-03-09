@@ -114,15 +114,31 @@ export default function ProductionOrdersPage() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: ProductionStatus }) => {
+      if (status === "completed") {
+        // Use atomic RPC to deduct raw materials and add finished products
+        const { data, error } = await supabase.rpc("complete_production_order", { p_order_id: id });
+        if (error) throw error;
+        return data;
+      }
+      
       const updates: Record<string, unknown> = { status };
       if (status === "in_progress") updates.actual_start_date = new Date().toISOString().split("T")[0];
-      if (status === "completed") updates.actual_end_date = new Date().toISOString().split("T")[0];
 
       const { error } = await supabase.from("production_orders").update(updates).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      toast({ title: "Status updated" });
+    onSuccess: (data, variables) => {
+      if (variables.status === "completed" && data) {
+        const result = data as { product_added?: { name: string; qty: number } };
+        toast({ 
+          title: "Production completed",
+          description: `Added ${result.product_added?.qty} ${result.product_added?.name} to inventory`
+        });
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+        queryClient.invalidateQueries({ queryKey: ["raw-materials"] });
+      } else {
+        toast({ title: "Status updated" });
+      }
       queryClient.invalidateQueries({ queryKey: ["production-orders"] });
     },
     onError: (err: Error) => {
