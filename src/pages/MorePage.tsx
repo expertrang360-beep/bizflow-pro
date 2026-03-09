@@ -5,7 +5,17 @@ import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, B
 
 type AppRole = "owner" | "manager" | "cashier" | "accountant";
 
-const menuItems: { label: string; icon: typeof TrendingDown; to: string; color: string; bg: string; roles?: AppRole[] }[] = [
+interface MenuItem {
+  label: string;
+  icon: typeof TrendingDown;
+  to: string;
+  color: string;
+  bg: string;
+  roles?: AppRole[];
+  manufacturerOnly?: boolean;
+}
+
+const menuItems: MenuItem[] = [
   { label: "Expenses", icon: TrendingDown, to: "/expenses", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager", "accountant"] },
   { label: "Customers & Debts", icon: Users, to: "/customers", color: "text-primary", bg: "bg-primary/10" },
   { label: "Suppliers", icon: Truck, to: "/suppliers", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager", "accountant"] },
@@ -15,6 +25,11 @@ const menuItems: { label: string; icon: typeof TrendingDown; to: string; color: 
   { label: "Payroll", icon: DollarSign, to: "/payroll", color: "text-[hsl(var(--success))]", bg: "bg-[hsl(var(--success-light))]", roles: ["owner"] },
   { label: "Profit & Loss", icon: FileText, to: "/profit-loss", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager", "accountant"] },
   { label: "Team", icon: UsersRound, to: "/team", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager"] },
+  // Manufacturing modules
+  { label: "Raw Materials", icon: Package, to: "/raw-materials", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Bill of Materials", icon: FileStack, to: "/bom", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Production Orders", icon: Factory, to: "/production-orders", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Production Costs", icon: Calculator, to: "/production-costs", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager"], manufacturerOnly: true },
 ];
 
 export default function MorePage() {
