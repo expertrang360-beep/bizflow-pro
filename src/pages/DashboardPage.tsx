@@ -38,6 +38,7 @@ const DEFAULT_STATS: DashboardStats = {
   todaySales: 0, todayExpenses: 0, todayProfit: 0,
   cashSales: 0, transferSales: 0, posSales: 0, creditSales: 0,
   totalDebtors: 0, totalPayables: 0, lowStockCount: 0,
+  deliveredCount: 0, pendingDeliveryCount: 0,
 };
 
 const DEFAULT_MFG: MfgStats = {
