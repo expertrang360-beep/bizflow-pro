@@ -24,10 +24,23 @@ interface DashboardStats {
   lowStockCount: number;
 }
 
+interface MfgStats {
+  todayProduced: number;
+  todayPackaged: number;
+  todayUnpackaged: number;
+  lowRawMaterialCount: number;
+  activeOrderCount: number;
+}
+
 const DEFAULT_STATS: DashboardStats = {
   todaySales: 0, todayExpenses: 0, todayProfit: 0,
   cashSales: 0, transferSales: 0, posSales: 0, creditSales: 0,
   totalDebtors: 0, totalPayables: 0, lowStockCount: 0,
+};
+
+const DEFAULT_MFG: MfgStats = {
+  todayProduced: 0, todayPackaged: 0, todayUnpackaged: 0,
+  lowRawMaterialCount: 0, activeOrderCount: 0,
 };
 
 export default function DashboardPage() {
