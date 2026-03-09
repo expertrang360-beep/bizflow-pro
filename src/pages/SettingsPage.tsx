@@ -78,11 +78,13 @@ export default function SettingsPage() {
   const { data: businessName } = useSetting("business_name");
   const { data: businessLogo } = useSetting("business_logo");
   const { data: currencyCode } = useSetting("currency");
+  const { data: businessType } = useSetting("business_type");
   const upsertSetting = useUpsertSetting();
 
   const [nameInput, setNameInput] = useState("");
   const [logoInput, setLogoInput] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("NGN");
+  const [selectedBusinessType, setSelectedBusinessType] = useState("trader");
 
   // Branches
   const { data: branches = [], isLoading: branchesLoading } = useQuery({
@@ -103,6 +105,7 @@ export default function SettingsPage() {
   useEffect(() => { if (businessName) setNameInput(businessName); }, [businessName]);
   useEffect(() => { if (businessLogo) setLogoInput(businessLogo); }, [businessLogo]);
   useEffect(() => { if (currencyCode) setSelectedCurrency(currencyCode); }, [currencyCode]);
+  useEffect(() => { if (businessType) setSelectedBusinessType(businessType); }, [businessType]);
 
   const saveBranchMutation = useMutation({
     mutationFn: async () => {
@@ -249,6 +252,36 @@ export default function SettingsPage() {
             </div>
           </div>
         </section>
+
+        {/* Business Type */}
+        {isOwner && (
+          <section>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 mb-3">Business Type</h2>
+            <div className="bg-card rounded-2xl border border-border shadow-card p-4">
+              <Label>Select your business model</Label>
+              <p className="text-xs text-muted-foreground mb-2">Manufacturers get extra modules: Raw Materials, BOM, Production Orders & Cost Tracking</p>
+              <div className="flex gap-2 mt-1">
+                <Select value={selectedBusinessType} onValueChange={setSelectedBusinessType}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="trader">Trader / E-Commerce</SelectItem>
+                    <SelectItem value="manufacturer">Manufacturer</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => upsertSetting.mutate({ key: "business_type", value: selectedBusinessType })}
+                  disabled={upsertSetting.isPending}
+                >
+                  <Save className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Branches */}
         {isOwner && (

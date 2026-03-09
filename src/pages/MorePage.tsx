@@ -1,10 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound } from "lucide-react";
+import { useBusinessType } from "@/hooks/useBusinessType";
+import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound, Package, FileStack, Factory, Calculator } from "lucide-react";
 
 type AppRole = "owner" | "manager" | "cashier" | "accountant";
 
-const menuItems: { label: string; icon: typeof TrendingDown; to: string; color: string; bg: string; roles?: AppRole[] }[] = [
+interface MenuItem {
+  label: string;
+  icon: typeof TrendingDown;
+  to: string;
+  color: string;
+  bg: string;
+  roles?: AppRole[];
+  manufacturerOnly?: boolean;
+}
+
+const menuItems: MenuItem[] = [
   { label: "Expenses", icon: TrendingDown, to: "/expenses", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager", "accountant"] },
   { label: "Customers & Debts", icon: Users, to: "/customers", color: "text-primary", bg: "bg-primary/10" },
   { label: "Suppliers", icon: Truck, to: "/suppliers", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager", "accountant"] },
@@ -14,15 +25,22 @@ const menuItems: { label: string; icon: typeof TrendingDown; to: string; color: 
   { label: "Payroll", icon: DollarSign, to: "/payroll", color: "text-[hsl(var(--success))]", bg: "bg-[hsl(var(--success-light))]", roles: ["owner"] },
   { label: "Profit & Loss", icon: FileText, to: "/profit-loss", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager", "accountant"] },
   { label: "Team", icon: UsersRound, to: "/team", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager"] },
+  // Manufacturing modules
+  { label: "Raw Materials", icon: Package, to: "/raw-materials", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Bill of Materials", icon: FileStack, to: "/bom", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Production Orders", icon: Factory, to: "/production-orders", color: "text-accent", bg: "bg-accent/10", roles: ["owner", "manager"], manufacturerOnly: true },
+  { label: "Production Costs", icon: Calculator, to: "/production-costs", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager"], manufacturerOnly: true },
 ];
 
 export default function MorePage() {
   const navigate = useNavigate();
   const { user, signOut, hasAnyRole, roles } = useAuth();
+  const { isManufacturer } = useBusinessType();
 
-  const visibleMenuItems = menuItems.filter(
-    (item) => !item.roles || roles.length === 0 || hasAnyRole(item.roles)
-  );
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (item.manufacturerOnly && !isManufacturer) return false;
+    return !item.roles || roles.length === 0 || hasAnyRole(item.roles);
+  });
 
   const userName = user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
 

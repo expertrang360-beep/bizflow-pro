@@ -29,6 +29,10 @@ import PayrollPage from "@/pages/PayrollPage";
 import ProfitLossPage from "@/pages/ProfitLossPage";
 import TeamPage from "@/pages/TeamPage";
 import SettingsPage from "@/pages/SettingsPage";
+import RawMaterialsPage from "@/pages/RawMaterialsPage";
+import BOMPage from "@/pages/BOMPage";
+import ProductionOrdersPage from "@/pages/ProductionOrdersPage";
+import ProductionCostsPage from "@/pages/ProductionCostsPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -130,6 +134,26 @@ function AppRoutes() {
         <Route path="/settings" element={
           <ProtectedRoute allowedRoles={["owner"]}>
             <SettingsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/raw-materials" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <RawMaterialsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/bom" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <BOMPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/production-orders" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductionOrdersPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/production-costs" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductionCostsPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />
