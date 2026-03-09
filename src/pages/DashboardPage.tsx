@@ -22,6 +22,8 @@ interface DashboardStats {
   totalDebtors: number;
   totalPayables: number;
   lowStockCount: number;
+  deliveredCount: number;
+  pendingDeliveryCount: number;
 }
 
 interface MfgStats {
@@ -36,6 +38,7 @@ const DEFAULT_STATS: DashboardStats = {
   todaySales: 0, todayExpenses: 0, todayProfit: 0,
   cashSales: 0, transferSales: 0, posSales: 0, creditSales: 0,
   totalDebtors: 0, totalPayables: 0, lowStockCount: 0,
+  deliveredCount: 0, pendingDeliveryCount: 0,
 };
 
 const DEFAULT_MFG: MfgStats = {
@@ -64,12 +67,13 @@ export default function DashboardPage() {
     setLoading(true);
     const today = todayStr();
 
-    const [salesRes, expensesRes, customersRes, suppliersRes, productsRes] = await Promise.all([
+    const [salesRes, expensesRes, customersRes, suppliersRes, productsRes, deliveryRes] = await Promise.all([
       supabase.from("sales").select("total, payment_type, subtotal, discount, tax, sale_items(qty, price, cost_at_time)").gte("created_at", `${today}T00:00:00`).lte("created_at", `${today}T23:59:59`).neq("status", "cancelled"),
       supabase.from("expenses").select("amount").eq("expense_date", today),
       supabase.from("customers").select("total_credit"),
       supabase.from("suppliers").select("total_payable"),
       supabase.from("products").select("stock_qty, reorder_level").eq("active", true),
+      supabase.from("sales").select("delivered").gte("created_at", `${today}T00:00:00`).lte("created_at", `${today}T23:59:59`).neq("status", "cancelled"),
     ]);
 
     const salesData = salesRes.data || [];
@@ -90,8 +94,11 @@ export default function DashboardPage() {
     const totalDebtors = (customersRes.data || []).reduce((s, r) => s + Number(r.total_credit), 0);
     const totalPayables = (suppliersRes.data || []).reduce((s, r) => s + Number(r.total_payable), 0);
     const lowStockCount = (productsRes.data || []).filter(p => Number(p.stock_qty) <= Number(p.reorder_level || 0)).length;
+    const deliveryData = deliveryRes.data || [];
+    const deliveredCount = deliveryData.filter(d => d.delivered).length;
+    const pendingDeliveryCount = deliveryData.filter(d => !d.delivered).length;
 
-    setStats({ todaySales: totalSales, todayExpenses: totalExpenses, todayProfit, cashSales, transferSales, posSales, creditSales, totalDebtors, totalPayables, lowStockCount });
+    setStats({ todaySales: totalSales, todayExpenses: totalExpenses, todayProfit, cashSales, transferSales, posSales, creditSales, totalDebtors, totalPayables, lowStockCount, deliveredCount, pendingDeliveryCount });
 
     // Fetch manufacturer stats
     const [dailyLogsRes, rawMatsRes, activeOrdersRes] = await Promise.all([
@@ -211,6 +218,28 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* Delivery Summary */}
+        <button
+          onClick={() => navigate("/sales")}
+          className="w-full bg-card rounded-2xl border border-border shadow-card p-4 text-left active:scale-95 transition-transform"
+        >
+          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Truck className="w-4 h-4 text-primary" />
+            Today's Deliveries
+            <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto" />
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-warning/10 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-warning">{stats.pendingDeliveryCount}</p>
+              <p className="text-xs text-warning/80 font-medium">Pending</p>
+            </div>
+            <div className="bg-accent/10 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-accent">{stats.deliveredCount}</p>
+              <p className="text-xs text-accent/80 font-medium">Delivered</p>
+            </div>
+          </div>
+        </button>
 
         {/* Manufacturing Widget */}
         {isManufacturer && (
