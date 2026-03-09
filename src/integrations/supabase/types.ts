@@ -1214,6 +1214,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_id: string | null
+          delivered: boolean
+          delivered_at: string | null
           discount: number
           id: string
           note: string | null
@@ -1230,6 +1232,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
+          delivered?: boolean
+          delivered_at?: string | null
           discount?: number
           id?: string
           note?: string | null
@@ -1246,6 +1250,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
+          delivered?: boolean
+          delivered_at?: string | null
           discount?: number
           id?: string
           note?: string | null
@@ -1529,6 +1535,10 @@ export type Database = {
       }
       update_customer_credit_atomic: {
         Args: { p_credit_delta: number; p_customer_id: string }
+        Returns: number
+      }
+      update_raw_material_stock_atomic: {
+        Args: { p_material_id: string; p_quantity_delta: number }
         Returns: number
       }
       update_stock_atomic: {
