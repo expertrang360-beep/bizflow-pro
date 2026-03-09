@@ -130,11 +130,15 @@ export default function DashboardPage() {
       days.push({ day: label, date: iso });
     }
     const sevenDaysAgo = days[0].date;
-    const trendRes = await supabase
-      .from("sales")
-      .select("created_at, total")
-      .gte("created_at", `${sevenDaysAgo}T00:00:00`)
-      .neq("status", "cancelled");
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
+    const prevWeekStart = fourteenDaysAgo.toISOString().slice(0, 10);
+
+    const [trendRes, prevWeekRes] = await Promise.all([
+      supabase.from("sales").select("created_at, total").gte("created_at", `${sevenDaysAgo}T00:00:00`).neq("status", "cancelled"),
+      supabase.from("sales").select("total").gte("created_at", `${prevWeekStart}T00:00:00`).lt("created_at", `${sevenDaysAgo}T00:00:00`).neq("status", "cancelled"),
+    ]);
+
     const trendSales = trendRes.data || [];
     const trendMap = new Map<string, { count: number; total: number }>();
     for (const d of days) trendMap.set(d.date, { count: 0, total: 0 });
@@ -144,6 +148,10 @@ export default function DashboardPage() {
       if (entry) { entry.count++; entry.total += Number(s.total); }
     }
     setTrendData(days.map(d => ({ day: d.day, ...trendMap.get(d.date)! })));
+
+    const thisWeekTotal = trendSales.reduce((s, r) => s + Number(r.total), 0);
+    const lastWeekTotal = (prevWeekRes.data || []).reduce((s, r) => s + Number(r.total), 0);
+    setWeekChange(lastWeekTotal > 0 ? ((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100 : thisWeekTotal > 0 ? 100 : 0);
 
     setLoading(false);
     setSyncStatus("synced");
