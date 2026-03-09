@@ -84,6 +84,7 @@ export default function SettingsPage() {
   const [nameInput, setNameInput] = useState("");
   const [logoInput, setLogoInput] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("NGN");
+  const [selectedBusinessType, setSelectedBusinessType] = useState("trader");
 
   // Branches
   const { data: branches = [], isLoading: branchesLoading } = useQuery({
