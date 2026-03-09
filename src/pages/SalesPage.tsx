@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNaira, formatDateTime, DEFAULT_BRANCH_ID } from "@/lib/bizkit";
-import { Plus, Search, Filter, ChevronRight, Check, Clock, Truck } from "lucide-react";
+import { Plus, Search, Filter, ChevronRight, Check, Clock, Truck, X, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Sale {
   id: string;
@@ -31,10 +34,17 @@ const paymentIcons: Record<string, string> = {
 
 export default function SalesPage() {
   const navigate = useNavigate();
+  const { hasAnyRole } = useAuth();
+  const { toast } = useToast();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDelivering, setBulkDelivering] = useState(false);
+
+  const canDeliver = hasAnyRole(["owner", "manager", "cashier"]);
 
   useEffect(() => { fetchSales(); }, [filter]);
 
@@ -58,6 +68,46 @@ export default function SalesPage() {
     return !q || s.id.includes(q) || s.customers?.name?.toLowerCase().includes(q) || s.payment_type.includes(q);
   });
 
+  const undeliveredFiltered = filtered.filter(s => !s.delivered && s.status !== "cancelled");
+
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllUndelivered = () => {
+    setSelected(new Set(undeliveredFiltered.map(s => s.id)));
+  };
+
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelected(new Set());
+  };
+
+  const handleBulkDeliver = async () => {
+    if (selected.size === 0) return;
+    setBulkDelivering(true);
+    try {
+      const ids = Array.from(selected);
+      const { error } = await supabase
+        .from("sales")
+        .update({ delivered: true, delivered_at: new Date().toISOString() })
+        .in("id", ids);
+      if (error) throw error;
+
+      setSales(prev => prev.map(s => ids.includes(s.id) ? { ...s, delivered: true } : s));
+      toast({ title: `${ids.length} sale${ids.length > 1 ? "s" : ""} marked as delivered 🚚` });
+      exitSelectMode();
+    } catch (err) {
+      toast({ title: "Error", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setBulkDelivering(false);
+    }
+  };
+
   const filters = ["all", "cash", "transfer", "pos", "credit"];
 
   return (
@@ -66,15 +116,52 @@ export default function SalesPage() {
       <div className="bg-card border-b border-border px-4 pt-12 pb-4 sticky top-0 z-30">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold">Sales</h1>
-          <Button
-            size="sm"
-            onClick={() => navigate("/sales/new")}
-            className="bg-primary text-primary-foreground gap-1 h-9 px-3"
-          >
-            <Plus className="w-4 h-4" />
-            New Sale
-          </Button>
+          <div className="flex items-center gap-2">
+            {canDeliver && !selectMode && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSelectMode(true)}
+                className="gap-1 h-9 px-3"
+              >
+                <Truck className="w-4 h-4" />
+                Deliver
+              </Button>
+            )}
+            {!selectMode && (
+              <Button
+                size="sm"
+                onClick={() => navigate("/sales/new")}
+                className="bg-primary text-primary-foreground gap-1 h-9 px-3"
+              >
+                <Plus className="w-4 h-4" />
+                New Sale
+              </Button>
+            )}
+            {selectMode && (
+              <Button size="sm" variant="ghost" onClick={exitSelectMode} className="h-9 px-3">
+                <X className="w-4 h-4" />
+                Cancel
+              </Button>
+            )}
+          </div>
         </div>
+
+        {/* Select mode bar */}
+        {selectMode && (
+          <div className="flex items-center justify-between mb-3 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2">
+            <div className="flex items-center gap-2">
+              <CheckSquare className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">{selected.size} selected</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={selectAllUndelivered}>
+                Select all pending
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -121,44 +208,82 @@ export default function SalesPage() {
           </div>
         ) : (
           <div className="space-y-2 animate-fade-in">
-            {filtered.map(sale => (
-              <button
-                key={sale.id}
-                onClick={() => navigate(`/sales/${sale.id}`)}
-                className="w-full bg-card rounded-xl border border-border shadow-card p-4 text-left active:scale-[0.98] transition-all duration-150 flex items-center gap-3"
-              >
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
-                  {paymentIcons[sale.payment_type] || "🧾"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="font-semibold text-sm">
-                      {sale.customers?.name || "Walk-in Customer"}
-                    </p>
-                    <p className="font-bold text-primary text-sm">{formatNaira(sale.total)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-2xs px-2 py-0.5 rounded-full capitalize ${statusColors[sale.status] || "bg-muted text-muted-foreground"}`}>
-                      {sale.status}
-                    </span>
-                    {sale.delivered ? (
-                      <span className="text-2xs px-2 py-0.5 rounded-full badge-success flex items-center gap-0.5">
-                        <Truck className="w-2.5 h-2.5" /> Delivered
+            {filtered.map(sale => {
+              const isSelectable = selectMode && !sale.delivered && sale.status !== "cancelled";
+              const isSelected = selected.has(sale.id);
+
+              return (
+                <button
+                  key={sale.id}
+                  onClick={() => {
+                    if (selectMode) {
+                      if (isSelectable) toggleSelect(sale.id);
+                    } else {
+                      navigate(`/sales/${sale.id}`);
+                    }
+                  }}
+                  className={`w-full bg-card rounded-xl border shadow-card p-4 text-left active:scale-[0.98] transition-all duration-150 flex items-center gap-3 ${
+                    isSelected ? "border-primary bg-primary/5" : "border-border"
+                  } ${selectMode && !isSelectable ? "opacity-50" : ""}`}
+                >
+                  {selectMode ? (
+                    <div className="flex-shrink-0">
+                      <Checkbox
+                        checked={isSelected}
+                        disabled={!isSelectable}
+                        onCheckedChange={() => isSelectable && toggleSelect(sale.id)}
+                        className="pointer-events-none"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
+                      {paymentIcons[sale.payment_type] || "🧾"}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <p className="font-semibold text-sm">
+                        {sale.customers?.name || "Walk-in Customer"}
+                      </p>
+                      <p className="font-bold text-primary text-sm">{formatNaira(sale.total)}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-2xs px-2 py-0.5 rounded-full capitalize ${statusColors[sale.status] || "bg-muted text-muted-foreground"}`}>
+                        {sale.status}
                       </span>
-                    ) : (
-                      <span className="text-2xs px-2 py-0.5 rounded-full bg-warning/10 text-warning">
-                        Pending
-                      </span>
-                    )}
-                    <span className="text-2xs text-muted-foreground">{formatDateTime(sale.created_at)}</span>
+                      {sale.delivered ? (
+                        <span className="text-2xs px-2 py-0.5 rounded-full badge-success flex items-center gap-0.5">
+                          <Truck className="w-2.5 h-2.5" /> Delivered
+                        </span>
+                      ) : (
+                        <span className="text-2xs px-2 py-0.5 rounded-full bg-warning/10 text-warning">
+                          Pending
+                        </span>
+                      )}
+                      <span className="text-2xs text-muted-foreground">{formatDateTime(sale.created_at)}</span>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              </button>
-            ))}
+                  {!selectMode && <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Bulk deliver FAB */}
+      {selectMode && selected.size > 0 && (
+        <div className="sticky bottom-20 px-4 pb-4 z-30">
+          <Button
+            onClick={handleBulkDeliver}
+            disabled={bulkDelivering}
+            className="w-full h-14 rounded-2xl shadow-primary-btn font-semibold text-base gap-2"
+          >
+            <Truck className="w-5 h-5" />
+            {bulkDelivering ? "Delivering..." : `Mark ${selected.size} as Delivered`}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
