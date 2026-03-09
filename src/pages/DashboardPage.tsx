@@ -6,10 +6,11 @@ import { useBusinessType } from "@/hooks/useBusinessType";
 import {
   TrendingUp, TrendingDown, ShoppingCart, Package, Users,
   Truck, Plus, ArrowRight, Wallet, CreditCard, AlertCircle,
-  RefreshCw, Factory, Boxes, ClipboardList
+  RefreshCw, Factory, Boxes, ClipboardList, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 
 interface DashboardStats {
   todaySales: number;
