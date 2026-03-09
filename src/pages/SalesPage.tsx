@@ -187,6 +187,19 @@ export default function SalesPage() {
               {f === "all" ? "All" : paymentIcons[f]} {f}
             </button>
           ))}
+          <div className="w-px bg-border flex-shrink-0" />
+          {(["all", "pending", "delivered"] as const).map(d => (
+            <button
+              key={d}
+              onClick={() => setDeliveryFilter(d)}
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors flex items-center gap-1 ${
+                deliveryFilter === d ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {d !== "all" && <Truck className="w-3 h-3" />}
+              {d === "all" ? "All Delivery" : d}
+            </button>
+          ))}
         </div>
       </div>
 
