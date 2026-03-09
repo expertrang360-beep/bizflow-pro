@@ -33,6 +33,7 @@ import RawMaterialsPage from "@/pages/RawMaterialsPage";
 import BOMPage from "@/pages/BOMPage";
 import ProductionOrdersPage from "@/pages/ProductionOrdersPage";
 import ProductionCostsPage from "@/pages/ProductionCostsPage";
+import ProductionCostDetailPage from "@/pages/ProductionCostDetailPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -154,6 +155,11 @@ function AppRoutes() {
         <Route path="/production-costs" element={
           <ProtectedRoute allowedRoles={["owner", "manager"]}>
             <ProductionCostsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/production-costs/:id" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductionCostDetailPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />
