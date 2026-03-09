@@ -212,6 +212,56 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Manufacturing Widget */}
+        {isManufacturer && (
+          <div className="bg-card rounded-2xl border border-border shadow-card p-4 space-y-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <Factory className="w-4 h-4 text-primary" />
+              Today's Production
+            </h2>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Produced", value: mfgStats.todayProduced, icon: "🏭" },
+                { label: "Packaged", value: mfgStats.todayPackaged, icon: "📦" },
+                { label: "Unpackaged", value: mfgStats.todayUnpackaged, icon: "📋" },
+              ].map(({ label, value, icon }) => (
+                <div key={label} className="bg-muted/50 rounded-xl p-3 text-center">
+                  <span className="text-lg">{icon}</span>
+                  <p className="text-lg font-bold text-foreground">{value}</p>
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {mfgStats.lowRawMaterialCount > 0 && (
+                <button
+                  onClick={() => navigate("/raw-materials")}
+                  className="flex items-center gap-2 bg-warning/10 border border-warning/30 rounded-xl p-3 active:scale-95 transition-transform"
+                >
+                  <Boxes className="w-4 h-4 text-warning flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-warning">{mfgStats.lowRawMaterialCount} Low</p>
+                    <p className="text-xs text-warning/70">Raw Materials</p>
+                  </div>
+                </button>
+              )}
+              {mfgStats.activeOrderCount > 0 && (
+                <button
+                  onClick={() => navigate("/production-orders")}
+                  className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-xl p-3 active:scale-95 transition-transform"
+                >
+                  <ClipboardList className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-primary">{mfgStats.activeOrderCount} Active</p>
+                    <p className="text-xs text-primary/70">Prod. Orders</p>
+                  </div>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Alerts row */}
         <div className="grid grid-cols-2 gap-3">
           <button
