@@ -14,6 +14,7 @@ interface Sale {
   amount_paid: number;
   created_at: string;
   customer_id: string | null;
+  delivered: boolean;
   customers?: { name: string } | null;
 }
 
