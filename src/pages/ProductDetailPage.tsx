@@ -118,8 +118,19 @@ export default function ProductDetailPage() {
   const handleDelete = async () => {
     setDeleting(true);
     try {
+      // Try hard delete first
       const { error } = await supabase.from("products").delete().eq("id", id!);
-      if (error) throw error;
+      if (error) {
+        // If foreign key constraint, soft-delete by deactivating
+        if (error.code === "23503") {
+          const { error: softErr } = await supabase.from("products").update({ active: false }).eq("id", id!);
+          if (softErr) throw softErr;
+          toast({ title: "Product deactivated 🗑️", description: "Product has sales history and was deactivated instead of deleted." });
+          navigate("/inventory");
+          return;
+        }
+        throw error;
+      }
       toast({ title: "Product deleted 🗑️" });
       navigate("/inventory");
     } catch (err) {
