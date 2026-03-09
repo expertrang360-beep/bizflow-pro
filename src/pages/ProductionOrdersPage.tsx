@@ -335,7 +335,8 @@ export default function ProductionOrdersPage() {
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
