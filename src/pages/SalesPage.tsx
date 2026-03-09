@@ -141,6 +141,15 @@ export default function SalesPage() {
                     <span className={`text-2xs px-2 py-0.5 rounded-full capitalize ${statusColors[sale.status] || "bg-muted text-muted-foreground"}`}>
                       {sale.status}
                     </span>
+                    {sale.delivered ? (
+                      <span className="text-2xs px-2 py-0.5 rounded-full badge-success flex items-center gap-0.5">
+                        <Truck className="w-2.5 h-2.5" /> Delivered
+                      </span>
+                    ) : (
+                      <span className="text-2xs px-2 py-0.5 rounded-full bg-warning/10 text-warning">
+                        Pending
+                      </span>
+                    )}
                     <span className="text-2xs text-muted-foreground">{formatDateTime(sale.created_at)}</span>
                   </div>
                 </div>
