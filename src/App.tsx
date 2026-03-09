@@ -163,6 +163,7 @@ function AppRoutes() {
             <ProductionCostDetailPage />
           </ProtectedRoute>
         } />
+        <Route path="/daily-production" element={<DailyProductionPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
