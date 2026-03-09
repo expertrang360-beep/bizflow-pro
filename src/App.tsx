@@ -71,6 +71,11 @@ function AppRoutes() {
             <NewProductPage />
           </ProtectedRoute>
         } />
+        <Route path="/inventory/:id" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <ProductDetailPage />
+          </ProtectedRoute>
+        } />
         <Route path="/reports" element={
           <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
             <ReportsPage />
