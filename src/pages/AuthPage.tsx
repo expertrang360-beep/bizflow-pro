@@ -45,9 +45,6 @@ export default function AuthPage() {
             emailRedirectTo: window.location.origin,
           },
         });
-            emailRedirectTo: window.location.origin,
-          },
-        });
         if (error) throw error;
         toast({ title: "Account created!", description: "You can now sign in." });
       } else if (mode === "login") {
