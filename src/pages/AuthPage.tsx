@@ -41,7 +41,10 @@ export default function AuthPage() {
           email: signupEmail,
           password,
           options: {
-            data: { name, phone: signupMethod === "phone" ? phone : (phone || undefined) },
+            data: { name, phone: signupMethod === "phone" ? phone : (phone || undefined), business_name: businessName || undefined },
+            emailRedirectTo: window.location.origin,
+          },
+        });
             emailRedirectTo: window.location.origin,
           },
         });
