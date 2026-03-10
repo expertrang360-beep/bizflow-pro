@@ -23,6 +23,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const [phone, setPhone] = useState("");
   const [loginPhone, setLoginPhone] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -40,7 +41,7 @@ export default function AuthPage() {
           email: signupEmail,
           password,
           options: {
-            data: { name, phone: signupMethod === "phone" ? phone : (phone || undefined) },
+            data: { name, phone: signupMethod === "phone" ? phone : (phone || undefined), business_name: businessName || undefined },
             emailRedirectTo: window.location.origin,
           },
         });
@@ -166,7 +167,24 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Phone field for phone signup */}
+          {/* Business Name field (signup only) */}
+          {mode === "signup" && (
+            <div className="space-y-1.5">
+              <Label htmlFor="businessName" className="text-sm font-medium">Business Name</Label>
+              <div className="relative">
+                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="businessName"
+                  type="text"
+                  placeholder="My Business Ltd"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  className="pl-10 h-11"
+                />
+              </div>
+            </div>
+          )}
+
           {mode === "signup" && signupMethod === "phone" && (
             <div className="space-y-1.5">
               <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>

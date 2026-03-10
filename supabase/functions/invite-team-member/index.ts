@@ -37,23 +37,23 @@ Deno.serve(async (req) => {
     const { name, phone, email, password, role } = await req.json();
     if (!name || !email || !password || !role) throw new Error("Missing required fields");
 
-    // Get caller's branch
+    // Get caller's branch and organization
     const { data: callerProfile } = await adminClient
       .from("profiles")
-      .select("branch_id")
+      .select("branch_id, organization_id")
       .eq("id", caller.id)
       .single();
 
-    // Create user via admin API
+    // Create user via admin API - pass organization_id in metadata
     const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { name, phone },
+      user_metadata: { name, phone, organization_id: callerProfile?.organization_id },
     });
     if (createErr) throw createErr;
 
-    // Update profile with branch
+    // Update profile with branch (org is already set via handle_new_user trigger)
     if (callerProfile?.branch_id) {
       await adminClient
         .from("profiles")
