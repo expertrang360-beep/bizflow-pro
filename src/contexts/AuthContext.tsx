@@ -8,6 +8,8 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   roles: AppRole[];
+  organizationId: string | null;
+  organizationName: string | null;
   loading: boolean;
   hasRole: (role: AppRole) => boolean;
   hasAnyRole: (roles: AppRole[]) => boolean;
@@ -18,6 +20,8 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   roles: [],
+  organizationId: null,
+  organizationName: null,
   loading: true,
   hasRole: () => false,
   hasAnyRole: () => false,
@@ -27,6 +31,8 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchRoles = async (userId: string) => {
@@ -37,13 +43,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRoles(data?.map((r) => r.role as AppRole) || []);
   };
 
+  const fetchOrganization = async (userId: string) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", userId)
+      .single();
+    
+    if (profile?.organization_id) {
+      setOrganizationId(profile.organization_id);
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("name")
+        .eq("id", profile.organization_id)
+        .single();
+      setOrganizationName(org?.name || null);
+    }
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
         fetchRoles(session.user.id);
+        fetchOrganization(session.user.id);
       } else {
         setRoles([]);
+        setOrganizationId(null);
+        setOrganizationName(null);
       }
       setLoading(false);
     });
@@ -52,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       if (session?.user) {
         fetchRoles(session.user.id);
+        fetchOrganization(session.user.id);
       }
       setLoading(false);
     });
@@ -67,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, roles, loading, hasRole, hasAnyRole, signOut }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, roles, organizationId, organizationName, loading, hasRole, hasAnyRole, signOut }}>
       {children}
     </AuthContext.Provider>
   );
