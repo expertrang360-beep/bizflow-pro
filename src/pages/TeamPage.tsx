@@ -36,6 +36,7 @@ export default function TeamPage() {
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
   const [invitePhone, setInvitePhone] = useState("");
   const [invitePassword, setInvitePassword] = useState("");
   const [inviteRole, setInviteRole] = useState<AppRole>("cashier");
@@ -73,11 +74,8 @@ export default function TeamPage() {
   // Invite new user via edge function
   const inviteMutation = useMutation({
     mutationFn: async () => {
-      // Generate placeholder email from phone
-      const email = `${invitePhone.replace(/\D/g, "")}@phone.bizkit.local`;
-      
       const { data, error } = await supabase.functions.invoke("invite-team-member", {
-        body: { name: inviteName, phone: invitePhone, email, password: invitePassword, role: inviteRole },
+        body: { name: inviteName, phone: invitePhone, email: inviteEmail, password: invitePassword, role: inviteRole },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -87,6 +85,7 @@ export default function TeamPage() {
       toast({ title: "Team member invited", description: `${inviteName} has been added as ${roleConfig[inviteRole].label}` });
       setInviteOpen(false);
       setInviteName("");
+      setInviteEmail("");
       setInvitePhone("");
       setInvitePassword("");
       setInviteRole("cashier");
@@ -178,7 +177,11 @@ export default function TeamPage() {
                   <Input value={inviteName} onChange={(e) => setInviteName(e.target.value)} placeholder="e.g. John Doe" />
                 </div>
                 <div>
-                  <Label>Phone Number</Label>
+                  <Label>Email Address</Label>
+                  <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="e.g. john@example.com" />
+                </div>
+                <div>
+                  <Label>Phone Number (optional)</Label>
                   <Input value={invitePhone} onChange={(e) => setInvitePhone(e.target.value)} placeholder="e.g. 08012345678" />
                 </div>
                 <div>
@@ -199,7 +202,7 @@ export default function TeamPage() {
                 <Button
                   className="w-full"
                   onClick={() => inviteMutation.mutate()}
-                  disabled={!inviteName || !invitePhone || !invitePassword || inviteMutation.isPending}
+                  disabled={!inviteName || !inviteEmail || !invitePassword || inviteMutation.isPending}
                 >
                   {inviteMutation.isPending ? "Adding..." : "Add Member"}
                 </Button>
