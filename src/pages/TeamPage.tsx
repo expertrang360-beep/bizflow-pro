@@ -177,7 +177,11 @@ export default function TeamPage() {
                   <Input value={inviteName} onChange={(e) => setInviteName(e.target.value)} placeholder="e.g. John Doe" />
                 </div>
                 <div>
-                  <Label>Phone Number</Label>
+                  <Label>Email Address</Label>
+                  <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="e.g. john@example.com" />
+                </div>
+                <div>
+                  <Label>Phone Number (optional)</Label>
                   <Input value={invitePhone} onChange={(e) => setInvitePhone(e.target.value)} placeholder="e.g. 08012345678" />
                 </div>
                 <div>
