@@ -74,11 +74,8 @@ export default function TeamPage() {
   // Invite new user via edge function
   const inviteMutation = useMutation({
     mutationFn: async () => {
-      // Generate placeholder email from phone
-      const email = `${invitePhone.replace(/\D/g, "")}@phone.bizkit.local`;
-      
       const { data, error } = await supabase.functions.invoke("invite-team-member", {
-        body: { name: inviteName, phone: invitePhone, email, password: invitePassword, role: inviteRole },
+        body: { name: inviteName, phone: invitePhone, email: inviteEmail, password: invitePassword, role: inviteRole },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
