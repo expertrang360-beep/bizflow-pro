@@ -785,6 +785,7 @@ export type Database = {
           net_pay: number
           other_deductions: number
           paye_tax: number
+          payment_status: string
           payroll_run_id: string
           pension: number
           staff_name: string
@@ -797,6 +798,7 @@ export type Database = {
           net_pay?: number
           other_deductions?: number
           paye_tax?: number
+          payment_status?: string
           payroll_run_id: string
           pension?: number
           staff_name: string
@@ -809,6 +811,7 @@ export type Database = {
           net_pay?: number
           other_deductions?: number
           paye_tax?: number
+          payment_status?: string
           payroll_run_id?: string
           pension?: number
           staff_name?: string
@@ -841,6 +844,7 @@ export type Database = {
           organization_id: string | null
           paid_date: string | null
           pay_period: string
+          payment_method: string
           period_end: string
           period_start: string
           status: Database["public"]["Enums"]["payroll_status"]
@@ -858,6 +862,7 @@ export type Database = {
           organization_id?: string | null
           paid_date?: string | null
           pay_period: string
+          payment_method?: string
           period_end: string
           period_start: string
           status?: Database["public"]["Enums"]["payroll_status"]
@@ -875,6 +880,7 @@ export type Database = {
           organization_id?: string | null
           paid_date?: string | null
           pay_period?: string
+          payment_method?: string
           period_end?: string
           period_start?: string
           status?: Database["public"]["Enums"]["payroll_status"]
