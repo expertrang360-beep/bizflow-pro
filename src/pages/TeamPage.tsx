@@ -202,7 +202,7 @@ export default function TeamPage() {
                 <Button
                   className="w-full"
                   onClick={() => inviteMutation.mutate()}
-                  disabled={!inviteName || !invitePhone || !invitePassword || inviteMutation.isPending}
+                  disabled={!inviteName || !inviteEmail || !invitePassword || inviteMutation.isPending}
                 >
                   {inviteMutation.isPending ? "Adding..." : "Add Member"}
                 </Button>
