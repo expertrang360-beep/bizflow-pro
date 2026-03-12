@@ -85,6 +85,7 @@ export default function TeamPage() {
       toast({ title: "Team member invited", description: `${inviteName} has been added as ${roleConfig[inviteRole].label}` });
       setInviteOpen(false);
       setInviteName("");
+      setInviteEmail("");
       setInvitePhone("");
       setInvitePassword("");
       setInviteRole("cashier");
