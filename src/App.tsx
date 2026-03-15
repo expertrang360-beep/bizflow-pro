@@ -171,6 +171,11 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
         <Route path="/daily-production" element={<DailyProductionPage />} />
+        <Route path="/advisor" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <AdvisorPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

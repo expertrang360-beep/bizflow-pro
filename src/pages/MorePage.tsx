@@ -16,6 +16,7 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
+  { label: "AI Advisor", icon: Sparkles, to: "/advisor", color: "text-primary", bg: "bg-primary/10", roles: ["owner", "manager"] },
   { label: "Expenses", icon: TrendingDown, to: "/expenses", color: "text-destructive", bg: "bg-destructive/10", roles: ["owner", "manager", "accountant"] },
   { label: "Customers & Debts", icon: Users, to: "/customers", color: "text-primary", bg: "bg-primary/10" },
   { label: "Suppliers", icon: Truck, to: "/suppliers", color: "text-warning", bg: "bg-warning/10", roles: ["owner", "manager", "accountant"] },
