@@ -36,6 +36,7 @@ import ProductionOrdersPage from "@/pages/ProductionOrdersPage";
 import ProductionCostsPage from "@/pages/ProductionCostsPage";
 import ProductionCostDetailPage from "@/pages/ProductionCostDetailPage";
 import DailyProductionPage from "@/pages/DailyProductionPage";
+import AdvisorPage from "@/pages/AdvisorPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -170,6 +171,11 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
         <Route path="/daily-production" element={<DailyProductionPage />} />
+        <Route path="/advisor" element={
+          <ProtectedRoute allowedRoles={["owner", "manager"]}>
+            <AdvisorPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
