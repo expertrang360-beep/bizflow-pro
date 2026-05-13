@@ -119,6 +119,15 @@ export default function NewSalePage() {
       toast({ variant: "destructive", title: "Customer required", description: "Select a customer for credit sales." });
       return;
     }
+    // Prompt for customer when missing on non-credit sales (once per session)
+    if (!selectedCustomer && paymentType !== "credit" && !walkInConfirmed) {
+      setShowCustomerPrompt(true);
+      return;
+    }
+    await commitSale();
+  };
+
+  const commitSale = async () => {
 
     setSaving(true);
     try {
@@ -203,7 +212,10 @@ export default function NewSalePage() {
         paymentType,
         status: saleStatus,
         customerName: selectedCustomer?.name,
+        customerPhone: selectedCustomer?.phone || undefined,
         note: note || undefined,
+        businessName,
+        cashier: user?.email?.split("@")[0],
       };
       setCompletedReceipt(receiptData);
       toast({ title: "Sale recorded! 🎉", description: `${formatNaira(total)} — ${paymentType.toUpperCase()}` });
