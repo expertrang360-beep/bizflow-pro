@@ -441,53 +441,71 @@ export default function NewSalePage() {
           </div>
         </div>
 
-        {/* Customer (required for credit) */}
-        {(paymentType === "credit" || selectedCustomer) && (
-          <div className="bg-card rounded-xl border border-border shadow-card p-4">
-            <Label className="text-sm font-semibold mb-2 block">
+        {/* Customer */}
+        <div className="bg-card rounded-xl border border-border shadow-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-sm font-semibold">
               Customer {paymentType === "credit" && <span className="text-destructive">*</span>}
             </Label>
-            {selectedCustomer ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{selectedCustomer.name}</p>
-                    <p className="text-xs text-muted-foreground">{selectedCustomer.phone}</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedCustomer(null)} className="text-xs text-destructive">Remove</button>
-              </div>
-            ) : (
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search customer..."
-                  value={customerSearch}
-                  onChange={(e) => { setCustomerSearch(e.target.value); setShowCustomers(true); }}
-                  onFocus={() => setShowCustomers(true)}
-                  className="pl-9 h-10"
-                />
-                {showCustomers && customerSearch && (
-                  <div className="absolute top-full left-0 right-0 z-50 bg-card border border-border rounded-xl shadow-card-hover mt-1 max-h-48 overflow-y-auto">
-                    {filteredCustomers.map(c => (
-                      <button
-                        key={c.id}
-                        onClick={() => { setSelectedCustomer(c); setCustomerSearch(""); setShowCustomers(false); }}
-                        className="w-full text-left px-4 py-3 hover:bg-muted/50 border-b border-border last:border-0 text-sm"
-                      >
-                        <p className="font-medium">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.phone}</p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowAddCustomer(true)}
+              className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+            >
+              <UserPlus className="w-3.5 h-3.5" /> Add new
+            </button>
           </div>
-        )}
+          {selectedCustomer ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{selectedCustomer.name}</p>
+                  <p className="text-xs text-muted-foreground">{selectedCustomer.phone || "No phone"}</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedCustomer(null)} className="text-xs text-destructive">Remove</button>
+            </div>
+          ) : (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="sale-customer-search"
+                placeholder={customers.length === 0 ? "No customers yet — tap 'Add new'" : "Search customer or leave for walk-in"}
+                value={customerSearch}
+                onChange={(e) => { setCustomerSearch(e.target.value); setShowCustomers(true); }}
+                onFocus={() => setShowCustomers(true)}
+                className="pl-9 h-10"
+                disabled={customers.length === 0}
+              />
+              {showCustomers && customerSearch && filteredCustomers.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 bg-card border border-border rounded-xl shadow-card-hover mt-1 max-h-48 overflow-y-auto">
+                  {filteredCustomers.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => { setSelectedCustomer(c); setCustomerSearch(""); setShowCustomers(false); }}
+                      className="w-full text-left px-4 py-3 hover:bg-muted/50 border-b border-border last:border-0 text-sm"
+                    >
+                      <p className="font-medium">{c.name}</p>
+                      <p className="text-xs text-muted-foreground">{c.phone}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showCustomers && customerSearch && filteredCustomers.length === 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddCustomer(true)}
+                  className="mt-2 w-full text-left px-3 py-2 rounded-lg border border-dashed border-primary/40 text-sm text-primary hover:bg-primary/5"
+                >
+                  + Add "{customerSearch}" as new customer
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Note */}
         <div className="bg-card rounded-xl border border-border shadow-card p-4">
