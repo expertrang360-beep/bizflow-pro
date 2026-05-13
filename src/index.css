@@ -126,12 +126,12 @@
     --warning-light: 38 60% 18%;
     --warning-text: 38 95% 70%;
 
-    --destructive: 0 75% 60%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
     --destructive-light: 0 60% 18%;
     --destructive-text: 0 85% 75%;
 
-    --success: 158 70% 50%;
+    --success: 158 75% 36%;
     --success-foreground: 0 0% 100%;
     --success-light: 158 50% 16%;
     --success-text: 158 75% 65%;
