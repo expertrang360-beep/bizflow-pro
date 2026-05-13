@@ -2,13 +2,25 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatNaira, DEFAULT_BRANCH_ID } from "@/lib/bizkit";
-import { ArrowLeft, Plus, Trash2, Search, Check, User, Download, Share2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Search, Check, User, Download, Share2, UserPlus, PackagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { downloadReceipt, shareReceipt, type ReceiptData } from "@/lib/receipt-pdf";
+import EmptyDataPrompt from "@/components/EmptyDataPrompt";
+import QuickAddContact from "@/components/QuickAddContact";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Product {
   id: string;
