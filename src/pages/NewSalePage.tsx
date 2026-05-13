@@ -285,6 +285,19 @@ export default function NewSalePage() {
       </div>
 
       <div className="flex-1 px-4 py-4 space-y-4">
+        {/* No products yet */}
+        {products.length === 0 && (
+          <EmptyDataPrompt
+            icon={<PackagePlus className="w-6 h-6" />}
+            title="No products yet"
+            description="Add at least one product to your inventory before recording a sale."
+            primaryLabel="Add product"
+            onPrimary={() => navigate("/products/new")}
+            secondaryLabel="Open inventory"
+            onSecondary={() => navigate("/inventory")}
+          />
+        )}
+
         {/* Product Search */}
         <div className="relative">
           <div className="relative">
@@ -496,6 +509,61 @@ export default function NewSalePage() {
           {saving ? "Saving..." : `Save Sale — ${formatNaira(total)}`}
         </Button>
       </div>
+
+      {/* Quick add customer dialog */}
+      <QuickAddContact
+        open={showAddCustomer}
+        onOpenChange={setShowAddCustomer}
+        kind="customer"
+        initialName={customerSearch}
+        onAdded={(c) => {
+          setCustomers(prev => [...prev, c]);
+          setSelectedCustomer(c);
+          setCustomerSearch("");
+          setShowCustomers(false);
+        }}
+      />
+
+      {/* Missing-customer prompt before saving */}
+      <AlertDialog open={showCustomerPrompt} onOpenChange={setShowCustomerPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add a customer?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Linking this sale to a customer helps you track loyalty, debts, and contact details. You can also continue without one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+            <Button
+              variant="outline"
+              className="justify-start gap-2"
+              onClick={() => { setShowCustomerPrompt(false); setShowAddCustomer(true); }}
+            >
+              <UserPlus className="w-4 h-4" /> Add new customer
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start gap-2"
+              disabled={customers.length === 0}
+              onClick={() => {
+                setShowCustomerPrompt(false);
+                setShowCustomers(true);
+                setTimeout(() => document.getElementById("sale-customer-search")?.focus(), 100);
+              }}
+            >
+              <Search className="w-4 h-4" /> Select existing
+            </Button>
+          </div>
+          <AlertDialogFooter className="pt-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { setWalkInConfirmed(true); setShowCustomerPrompt(false); commitSale(); }}
+            >
+              Continue as walk-in
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
