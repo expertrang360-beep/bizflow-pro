@@ -36,16 +36,20 @@
     --accent-foreground: 243 75% 35%;
     --accent-light: 250 90% 96%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 95% 45%;
+    --warning-foreground: 232 40% 10%;
     --warning-light: 38 92% 94%;
+    --warning-text: 38 95% 30%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 47%;
     --destructive-foreground: 0 0% 100%;
     --destructive-light: 0 84% 96%;
+    --destructive-text: 0 72% 42%;
 
-    --success: 158 70% 40%;
-    --success-light: 158 70% 94%;
+    --success: 158 82% 26%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 158 60% 93%;
+    --success-text: 158 78% 26%;
 
     --border: 232 20% 90%;
     --input: 232 20% 90%;
@@ -117,16 +121,20 @@
     --accent-foreground: 250 90% 85%;
     --accent-light: 243 60% 20%;
 
-    --warning: 38 92% 60%;
+    --warning: 38 95% 60%;
     --warning-foreground: 232 40% 10%;
     --warning-light: 38 60% 18%;
+    --warning-text: 38 95% 70%;
 
-    --destructive: 0 75% 60%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
     --destructive-light: 0 60% 18%;
+    --destructive-text: 0 85% 75%;
 
-    --success: 158 70% 50%;
+    --success: 158 82% 28%;
+    --success-foreground: 0 0% 100%;
     --success-light: 158 50% 16%;
+    --success-text: 158 75% 65%;
 
     --border: 232 30% 18%;
     --input: 232 30% 18%;
@@ -219,13 +227,13 @@
 
   /* Status badges */
   .badge-success {
-    @apply bg-[hsl(var(--success-light))] text-[hsl(var(--success))] font-medium;
+    @apply bg-[hsl(var(--success-light))] text-[hsl(var(--success-text))] font-medium;
   }
   .badge-warning {
-    @apply bg-[hsl(var(--warning-light))] text-[hsl(var(--warning))] font-medium;
+    @apply bg-[hsl(var(--warning-light))] text-[hsl(var(--warning-text))] font-medium;
   }
   .badge-danger {
-    @apply bg-[hsl(var(--destructive-light))] text-[hsl(var(--destructive))] font-medium;
+    @apply bg-[hsl(var(--destructive-light))] text-[hsl(var(--destructive-text))] font-medium;
   }
   .badge-info {
     @apply bg-[hsl(var(--primary-light))] text-[hsl(var(--primary))] font-medium;
