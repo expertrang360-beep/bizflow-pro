@@ -2,13 +2,25 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatNaira, DEFAULT_BRANCH_ID } from "@/lib/bizkit";
-import { ArrowLeft, Plus, Trash2, Search, Check, User, Download, Share2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Search, Check, User, Download, Share2, UserPlus, PackagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { downloadReceipt, shareReceipt, type ReceiptData } from "@/lib/receipt-pdf";
+import EmptyDataPrompt from "@/components/EmptyDataPrompt";
+import QuickAddContact from "@/components/QuickAddContact";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Product {
   id: string;
@@ -54,10 +66,17 @@ export default function NewSalePage() {
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [completedReceipt, setCompletedReceipt] = useState<ReceiptData | null>(null);
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
+  const [showCustomerPrompt, setShowCustomerPrompt] = useState(false);
+  const [walkInConfirmed, setWalkInConfirmed] = useState(false);
+  const [businessName, setBusinessName] = useState<string>("BizKit Store");
 
   useEffect(() => {
     supabase.from("products").select("*").eq("active", true).then(({ data }) => setProducts((data as Product[]) || []));
     supabase.from("customers").select("id, name, phone").then(({ data }) => setCustomers((data as Customer[]) || []));
+    supabase.from("organizations").select("name").maybeSingle().then(({ data }) => {
+      if (data?.name) setBusinessName(data.name);
+    });
   }, []);
 
   const filteredProducts = products.filter(p =>
@@ -100,6 +119,15 @@ export default function NewSalePage() {
       toast({ variant: "destructive", title: "Customer required", description: "Select a customer for credit sales." });
       return;
     }
+    // Prompt for customer when missing on non-credit sales (once per session)
+    if (!selectedCustomer && paymentType !== "credit" && !walkInConfirmed) {
+      setShowCustomerPrompt(true);
+      return;
+    }
+    await commitSale();
+  };
+
+  const commitSale = async () => {
 
     setSaving(true);
     try {
@@ -184,7 +212,10 @@ export default function NewSalePage() {
         paymentType,
         status: saleStatus,
         customerName: selectedCustomer?.name,
+        customerPhone: selectedCustomer?.phone || undefined,
         note: note || undefined,
+        businessName,
+        cashier: user?.email?.split("@")[0],
       };
       setCompletedReceipt(receiptData);
       toast({ title: "Sale recorded! 🎉", description: `${formatNaira(total)} — ${paymentType.toUpperCase()}` });
@@ -254,6 +285,19 @@ export default function NewSalePage() {
       </div>
 
       <div className="flex-1 px-4 py-4 space-y-4">
+        {/* No products yet */}
+        {products.length === 0 && (
+          <EmptyDataPrompt
+            icon={<PackagePlus className="w-6 h-6" />}
+            title="No products yet"
+            description="Add at least one product to your inventory before recording a sale."
+            primaryLabel="Add product"
+            onPrimary={() => navigate("/inventory/new")}
+            secondaryLabel="Open inventory"
+            onSecondary={() => navigate("/inventory")}
+          />
+        )}
+
         {/* Product Search */}
         <div className="relative">
           <div className="relative">
@@ -397,53 +441,71 @@ export default function NewSalePage() {
           </div>
         </div>
 
-        {/* Customer (required for credit) */}
-        {(paymentType === "credit" || selectedCustomer) && (
-          <div className="bg-card rounded-xl border border-border shadow-card p-4">
-            <Label className="text-sm font-semibold mb-2 block">
+        {/* Customer */}
+        <div className="bg-card rounded-xl border border-border shadow-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-sm font-semibold">
               Customer {paymentType === "credit" && <span className="text-destructive">*</span>}
             </Label>
-            {selectedCustomer ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{selectedCustomer.name}</p>
-                    <p className="text-xs text-muted-foreground">{selectedCustomer.phone}</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedCustomer(null)} className="text-xs text-destructive">Remove</button>
-              </div>
-            ) : (
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search customer..."
-                  value={customerSearch}
-                  onChange={(e) => { setCustomerSearch(e.target.value); setShowCustomers(true); }}
-                  onFocus={() => setShowCustomers(true)}
-                  className="pl-9 h-10"
-                />
-                {showCustomers && customerSearch && (
-                  <div className="absolute top-full left-0 right-0 z-50 bg-card border border-border rounded-xl shadow-card-hover mt-1 max-h-48 overflow-y-auto">
-                    {filteredCustomers.map(c => (
-                      <button
-                        key={c.id}
-                        onClick={() => { setSelectedCustomer(c); setCustomerSearch(""); setShowCustomers(false); }}
-                        className="w-full text-left px-4 py-3 hover:bg-muted/50 border-b border-border last:border-0 text-sm"
-                      >
-                        <p className="font-medium">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.phone}</p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowAddCustomer(true)}
+              className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+            >
+              <UserPlus className="w-3.5 h-3.5" /> Add new
+            </button>
           </div>
-        )}
+          {selectedCustomer ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{selectedCustomer.name}</p>
+                  <p className="text-xs text-muted-foreground">{selectedCustomer.phone || "No phone"}</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedCustomer(null)} className="text-xs text-destructive">Remove</button>
+            </div>
+          ) : (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="sale-customer-search"
+                placeholder={customers.length === 0 ? "No customers yet — tap 'Add new'" : "Search customer or leave for walk-in"}
+                value={customerSearch}
+                onChange={(e) => { setCustomerSearch(e.target.value); setShowCustomers(true); }}
+                onFocus={() => setShowCustomers(true)}
+                className="pl-9 h-10"
+                disabled={customers.length === 0}
+              />
+              {showCustomers && customerSearch && filteredCustomers.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 bg-card border border-border rounded-xl shadow-card-hover mt-1 max-h-48 overflow-y-auto">
+                  {filteredCustomers.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => { setSelectedCustomer(c); setCustomerSearch(""); setShowCustomers(false); }}
+                      className="w-full text-left px-4 py-3 hover:bg-muted/50 border-b border-border last:border-0 text-sm"
+                    >
+                      <p className="font-medium">{c.name}</p>
+                      <p className="text-xs text-muted-foreground">{c.phone}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showCustomers && customerSearch && filteredCustomers.length === 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddCustomer(true)}
+                  className="mt-2 w-full text-left px-3 py-2 rounded-lg border border-dashed border-primary/40 text-sm text-primary hover:bg-primary/5"
+                >
+                  + Add "{customerSearch}" as new customer
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Note */}
         <div className="bg-card rounded-xl border border-border shadow-card p-4">
@@ -465,6 +527,61 @@ export default function NewSalePage() {
           {saving ? "Saving..." : `Save Sale — ${formatNaira(total)}`}
         </Button>
       </div>
+
+      {/* Quick add customer dialog */}
+      <QuickAddContact
+        open={showAddCustomer}
+        onOpenChange={setShowAddCustomer}
+        kind="customer"
+        initialName={customerSearch}
+        onAdded={(c) => {
+          setCustomers(prev => [...prev, c]);
+          setSelectedCustomer(c);
+          setCustomerSearch("");
+          setShowCustomers(false);
+        }}
+      />
+
+      {/* Missing-customer prompt before saving */}
+      <AlertDialog open={showCustomerPrompt} onOpenChange={setShowCustomerPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add a customer?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Linking this sale to a customer helps you track loyalty, debts, and contact details. You can also continue without one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+            <Button
+              variant="outline"
+              className="justify-start gap-2"
+              onClick={() => { setShowCustomerPrompt(false); setShowAddCustomer(true); }}
+            >
+              <UserPlus className="w-4 h-4" /> Add new customer
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start gap-2"
+              disabled={customers.length === 0}
+              onClick={() => {
+                setShowCustomerPrompt(false);
+                setShowCustomers(true);
+                setTimeout(() => document.getElementById("sale-customer-search")?.focus(), 100);
+              }}
+            >
+              <Search className="w-4 h-4" /> Select existing
+            </Button>
+          </div>
+          <AlertDialogFooter className="pt-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { setWalkInConfirmed(true); setShowCustomerPrompt(false); commitSale(); }}
+            >
+              Continue as walk-in
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
