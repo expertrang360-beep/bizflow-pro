@@ -292,7 +292,7 @@ export default function NewSalePage() {
             title="No products yet"
             description="Add at least one product to your inventory before recording a sale."
             primaryLabel="Add product"
-            onPrimary={() => navigate("/products/new")}
+            onPrimary={() => navigate("/inventory/new")}
             secondaryLabel="Open inventory"
             onSecondary={() => navigate("/inventory")}
           />

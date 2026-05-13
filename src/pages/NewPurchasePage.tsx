@@ -215,7 +215,7 @@ export default function NewPurchasePage() {
             title="No products yet"
             description="Create a product before recording a restock purchase."
             primaryLabel="Add product"
-            onPrimary={() => navigate("/products/new")}
+            onPrimary={() => navigate("/inventory/new")}
           />
         )}
 
