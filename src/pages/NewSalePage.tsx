@@ -66,10 +66,17 @@ export default function NewSalePage() {
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [completedReceipt, setCompletedReceipt] = useState<ReceiptData | null>(null);
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
+  const [showCustomerPrompt, setShowCustomerPrompt] = useState(false);
+  const [walkInConfirmed, setWalkInConfirmed] = useState(false);
+  const [businessName, setBusinessName] = useState<string>("BizKit Store");
 
   useEffect(() => {
     supabase.from("products").select("*").eq("active", true).then(({ data }) => setProducts((data as Product[]) || []));
     supabase.from("customers").select("id, name, phone").then(({ data }) => setCustomers((data as Customer[]) || []));
+    supabase.from("organizations").select("name").maybeSingle().then(({ data }) => {
+      if (data?.name) setBusinessName(data.name);
+    });
   }, []);
 
   const filteredProducts = products.filter(p =>
