@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatNaira, DEFAULT_BRANCH_ID } from "@/lib/bizkit";
-import { ArrowLeft, Plus, Trash2, Search, Check, Truck } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Search, Check, Truck, UserPlus, PackagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import EmptyDataPrompt from "@/components/EmptyDataPrompt";
+import QuickAddContact from "@/components/QuickAddContact";
 
 interface Product {
   id: string;
@@ -49,6 +51,7 @@ export default function NewPurchasePage() {
   const [paidAmount, setPaidAmount] = useState(0);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showAddSupplier, setShowAddSupplier] = useState(false);
 
   useEffect(() => {
     supabase.from("products").select("id, name, sku, cost_price, stock_qty, unit").eq("active", true).then(({ data }) => setProducts((data as Product[]) || []));
