@@ -199,20 +199,49 @@ export default function NewPurchasePage() {
       </div>
 
       <div className="flex-1 px-4 py-4 space-y-4">
+        {/* Empty data prompts */}
+        {suppliers.length === 0 && (
+          <EmptyDataPrompt
+            icon={<UserPlus className="w-6 h-6" />}
+            title="No suppliers yet"
+            description="Add a supplier so you can record where this stock came from."
+            primaryLabel="Add supplier"
+            onPrimary={() => setShowAddSupplier(true)}
+          />
+        )}
+        {products.length === 0 && (
+          <EmptyDataPrompt
+            icon={<PackagePlus className="w-6 h-6" />}
+            title="No products yet"
+            description="Create a product before recording a restock purchase."
+            primaryLabel="Add product"
+            onPrimary={() => navigate("/products/new")}
+          />
+        )}
+
         {/* Supplier Selection */}
         <div className="bg-card rounded-xl border border-border shadow-card p-4">
-          <Label className="text-sm font-semibold mb-2 block">
-            Supplier <span className="text-destructive">*</span>
-          </Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-sm font-semibold">
+              Supplier <span className="text-destructive">*</span>
+            </Label>
+            <button
+              type="button"
+              onClick={() => setShowAddSupplier(true)}
+              className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+            >
+              <UserPlus className="w-3.5 h-3.5" /> Add new
+            </button>
+          </div>
           {selectedSupplier ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-warning/10 rounded-full flex items-center justify-center">
+                <div className="w-9 h-9 bg-warning/10 rounded-full flex items-center justify-center">
                   <Truck className="w-4 h-4 text-[hsl(var(--warning))]" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">{selectedSupplier.name}</p>
-                  <p className="text-xs text-muted-foreground">{selectedSupplier.phone}</p>
+                  <p className="text-xs text-muted-foreground">{selectedSupplier.phone || "No phone"}</p>
                 </div>
               </div>
               <button onClick={() => setSelectedSupplier(null)} className="text-xs text-destructive">Change</button>
@@ -221,17 +250,16 @@ export default function NewPurchasePage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search supplier..."
+                placeholder={suppliers.length === 0 ? "No suppliers yet — tap 'Add new'" : "Search supplier..."}
                 value={supplierSearch}
                 onChange={e => { setSupplierSearch(e.target.value); setShowSuppliers(true); }}
                 onFocus={() => setShowSuppliers(true)}
                 className="pl-9 h-10"
+                disabled={suppliers.length === 0}
               />
-              {showSuppliers && supplierSearch && (
+              {showSuppliers && supplierSearch && filteredSuppliers.length > 0 && (
                 <div className="absolute top-full left-0 right-0 z-50 bg-card border border-border rounded-xl shadow-card-hover mt-1 max-h-48 overflow-y-auto">
-                  {filteredSuppliers.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No suppliers found</p>
-                  ) : filteredSuppliers.map(s => (
+                  {filteredSuppliers.map(s => (
                     <button
                       key={s.id}
                       onClick={() => { setSelectedSupplier(s); setSupplierSearch(""); setShowSuppliers(false); }}
@@ -242,6 +270,15 @@ export default function NewPurchasePage() {
                     </button>
                   ))}
                 </div>
+              )}
+              {showSuppliers && supplierSearch && filteredSuppliers.length === 0 && suppliers.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddSupplier(true)}
+                  className="mt-2 w-full text-left px-3 py-2 rounded-lg border border-dashed border-primary/40 text-sm text-primary hover:bg-primary/5"
+                >
+                  + Add "{supplierSearch}" as new supplier
+                </button>
               )}
             </div>
           )}
@@ -395,6 +432,19 @@ export default function NewPurchasePage() {
           {saving ? "Saving..." : `Save Purchase — ${formatNaira(total)}`}
         </Button>
       </div>
+
+      <QuickAddContact
+        open={showAddSupplier}
+        onOpenChange={setShowAddSupplier}
+        kind="supplier"
+        initialName={supplierSearch}
+        onAdded={(s) => {
+          setSuppliers(prev => [...prev, s]);
+          setSelectedSupplier(s);
+          setSupplierSearch("");
+          setShowSuppliers(false);
+        }}
+      />
     </div>
   );
 }
