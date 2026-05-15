@@ -40,6 +40,7 @@ import AdvisorPage from "@/pages/AdvisorPage";
 import SubscriptionPage from "@/pages/SubscriptionPage";
 import AdminLicensesPage from "@/pages/AdminLicensesPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 
 const queryClient = new QueryClient();
 
@@ -175,7 +176,16 @@ function AppRoutes() {
         <Route path="/daily-production" element={<DailyProductionPage />} />
         <Route path="/advisor" element={
           <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <AdvisorPage />
+            <FeatureGate feature="ai_advisor">
+              <AdvisorPage />
+            </FeatureGate>
+          </ProtectedRoute>
+        } />
+        <Route path="/payroll" element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <FeatureGate feature="payroll">
+              <PayrollPage />
+            </FeatureGate>
           </ProtectedRoute>
         } />
         <Route path="/subscription" element={
