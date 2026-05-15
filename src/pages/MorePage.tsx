@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessType } from "@/hooks/useBusinessType";
-import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound, Package, FileStack, Factory, Calculator, ClipboardList, Sparkles } from "lucide-react";
+import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound, Package, FileStack, Factory, Calculator, ClipboardList, Sparkles, Crown, ShieldCheck } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
 
 type AppRole = "owner" | "manager" | "cashier" | "accountant";
 
@@ -38,6 +39,8 @@ export default function MorePage() {
   const navigate = useNavigate();
   const { user, signOut, hasAnyRole, roles } = useAuth();
   const { isManufacturer } = useBusinessType();
+  const { subscription, daysLeft } = useSubscription();
+  const isSuperAdmin = roles.includes("super_admin" as any);
 
   const visibleMenuItems = menuItems.filter((item) => {
     if (item.manufacturerOnly && !isManufacturer) return false;
@@ -80,6 +83,35 @@ export default function MorePage() {
 
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pt-2">Account</h2>
         <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
+          {hasAnyRole(["owner"]) && (
+            <button
+              onClick={() => navigate("/subscription")}
+              className="w-full flex items-center gap-3 px-4 py-4 active:bg-muted transition-colors border-b border-border"
+            >
+              <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
+                <Crown className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium">Subscription</p>
+                <p className="text-xs text-muted-foreground">
+                  {subscription ? `${subscription.plan_name}${daysLeft !== null ? ` · ${daysLeft}d left` : ""}` : "No active plan"}
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigate("/admin/licenses")}
+              className="w-full flex items-center gap-3 px-4 py-4 active:bg-muted transition-colors border-b border-border"
+            >
+              <div className="w-9 h-9 bg-accent/10 rounded-xl flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-accent" />
+              </div>
+              <span className="flex-1 text-sm font-medium text-left">Admin · License Keys</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
           <button
             onClick={() => navigate("/settings")}
             className="w-full flex items-center gap-3 px-4 py-4 active:bg-muted transition-colors"

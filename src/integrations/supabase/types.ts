@@ -756,6 +756,63 @@ export type Database = {
           },
         ]
       }
+      license_keys: {
+        Row: {
+          activated_at: string | null
+          assigned_org_id: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          key: string
+          notes: string | null
+          plan_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          assigned_org_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          key: string
+          notes?: string | null
+          plan_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          assigned_org_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          key?: string
+          notes?: string | null
+          plan_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "license_keys_assigned_org_id_fkey"
+            columns: ["assigned_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_keys_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -905,6 +962,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plans: {
+        Row: {
+          active: boolean
+          billing_period: string
+          created_at: string
+          currency: string
+          description: string | null
+          duration_days: number
+          features: Json
+          id: string
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          billing_period?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          duration_days?: number
+          features?: Json
+          id?: string
+          name: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          billing_period?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          duration_days?: number
+          features?: Json
+          id?: string
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       production_costs: {
         Row: {
@@ -1548,6 +1650,64 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          license_key_id: string | null
+          organization_id: string
+          plan_id: string
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          license_key_id?: string | null
+          organization_id: string
+          plan_id: string
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          license_key_id?: string | null
+          organization_id?: string
+          plan_id?: string
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_license_key_id_fkey"
+            columns: ["license_key_id"]
+            isOneToOne: false
+            referencedRelation: "license_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_payments: {
         Row: {
           amount: number
@@ -1773,7 +1933,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_org_feature: {
+        Args: { p_feature: string; p_org_id?: string }
+        Returns: boolean
+      }
       complete_production_order: { Args: { p_order_id: string }; Returns: Json }
+      generate_license_key: { Args: never; Returns: string }
+      get_org_subscription: { Args: { p_org_id?: string }; Returns: Json }
       get_user_branch: { Args: { _user_id: string }; Returns: string }
       get_user_organization_id: { Args: never; Returns: string }
       has_role: {
@@ -1783,6 +1949,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: never; Returns: boolean }
+      redeem_license_key: { Args: { p_key: string }; Returns: Json }
       update_customer_credit_atomic: {
         Args: { p_credit_delta: number; p_customer_id: string }
         Returns: number
@@ -1805,7 +1973,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "owner" | "manager" | "cashier" | "accountant"
+      app_role: "owner" | "manager" | "cashier" | "accountant" | "super_admin"
       asset_status: "active" | "disposed" | "maintenance" | "retired"
       business_type: "trader" | "manufacturer"
       cashbook_direction: "in" | "out"
@@ -1944,7 +2112,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["owner", "manager", "cashier", "accountant"],
+      app_role: ["owner", "manager", "cashier", "accountant", "super_admin"],
       asset_status: ["active", "disposed", "maintenance", "retired"],
       business_type: ["trader", "manufacturer"],
       cashbook_direction: ["in", "out"],
