@@ -128,11 +128,6 @@ function AppRoutes() {
             <TaxPage />
           </ProtectedRoute>
         } />
-        <Route path="/payroll" element={
-          <ProtectedRoute allowedRoles={["owner"]}>
-            <PayrollPage />
-          </ProtectedRoute>
-        } />
         <Route path="/profit-loss" element={
           <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
             <ProfitLossPage />
