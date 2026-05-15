@@ -37,6 +37,8 @@ import ProductionCostsPage from "@/pages/ProductionCostsPage";
 import ProductionCostDetailPage from "@/pages/ProductionCostDetailPage";
 import DailyProductionPage from "@/pages/DailyProductionPage";
 import AdvisorPage from "@/pages/AdvisorPage";
+import SubscriptionPage from "@/pages/SubscriptionPage";
+import AdminLicensesPage from "@/pages/AdminLicensesPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -174,6 +176,16 @@ function AppRoutes() {
         <Route path="/advisor" element={
           <ProtectedRoute allowedRoles={["owner", "manager"]}>
             <AdvisorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/subscription" element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <SubscriptionPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/licenses" element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <AdminLicensesPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />
