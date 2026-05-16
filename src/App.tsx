@@ -39,6 +39,7 @@ import DailyProductionPage from "@/pages/DailyProductionPage";
 import AdvisorPage from "@/pages/AdvisorPage";
 import SubscriptionPage from "@/pages/SubscriptionPage";
 import AdminLicensesPage from "@/pages/AdminLicensesPage";
+import PaymentPage from "@/pages/PaymentPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FeatureGate from "@/components/FeatureGate";
 
@@ -186,6 +187,11 @@ function AppRoutes() {
         <Route path="/subscription" element={
           <ProtectedRoute allowedRoles={["owner"]}>
             <SubscriptionPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/pay/:planId" element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <PaymentPage />
           </ProtectedRoute>
         } />
         <Route path="/admin/licenses" element={

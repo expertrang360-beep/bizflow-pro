@@ -834,6 +834,77 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          payer_note: string | null
+          plan_id: string
+          proof_url: string | null
+          provider: string
+          reference: string
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          payer_note?: string | null
+          plan_id: string
+          proof_url?: string | null
+          provider: string
+          reference: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          payer_note?: string | null
+          plan_id?: string
+          proof_url?: string | null
+          provider?: string
+          reference?: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_items: {
         Row: {
           allowances: number
@@ -1003,6 +1074,42 @@ export type Database = {
           id?: string
           name?: string
           price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_bank_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          active: boolean
+          bank_name: string
+          created_at: string
+          id: string
+          instructions: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          active?: boolean
+          bank_name: string
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          active?: boolean
+          bank_name?: string
+          created_at?: string
+          id?: string
+          instructions?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -1933,6 +2040,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_subscription_from_payment: {
+        Args: { p_payment_id: string }
+        Returns: string
+      }
+      approve_manual_payment: {
+        Args: { p_admin_note?: string; p_payment_id: string }
+        Returns: string
+      }
       check_org_feature: {
         Args: { p_feature: string; p_org_id?: string }
         Returns: boolean
@@ -1951,6 +2066,10 @@ export type Database = {
       }
       is_super_admin: { Args: never; Returns: boolean }
       redeem_license_key: { Args: { p_key: string }; Returns: Json }
+      reject_manual_payment: {
+        Args: { p_admin_note?: string; p_payment_id: string }
+        Returns: undefined
+      }
       update_customer_credit_atomic: {
         Args: { p_credit_delta: number; p_customer_id: string }
         Returns: number
