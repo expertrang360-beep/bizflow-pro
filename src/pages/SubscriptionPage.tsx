@@ -153,11 +153,15 @@ export default function SubscriptionPage() {
                     {modules.multi_branch && <Feature label="Multi-branch" />}
                     {modules.manufacturing && <Feature label="Manufacturing module" />}
                   </div>
-                  {isCurrent && (
+                  {isCurrent ? (
                     <div className="mt-3 text-xs text-primary font-medium flex items-center gap-1">
                       <Sparkles className="w-3 h-3" /> Your active plan
                     </div>
-                  )}
+                  ) : p.price > 0 ? (
+                    <Button className="w-full mt-3" onClick={() => navigate(`/pay/${p.id}`)}>
+                      Subscribe — {fmt(p.price, p.currency)}
+                    </Button>
+                  ) : null}
                 </Card>
               );
             })}
