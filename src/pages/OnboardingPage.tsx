@@ -64,10 +64,21 @@ export default function OnboardingPage() {
   }, [user, hasRole, navigate]);
 
   const finish = async () => {
-    await supabase.from("app_settings").upsert(
-      { key: "onboarding_completed", value: "true", organization_id: organizationId },
-      { onConflict: "key" }
-    );
+    const { data: existing } = await supabase
+      .from("app_settings")
+      .select("id")
+      .eq("key", "onboarding_completed")
+      .maybeSingle();
+    if (existing) {
+      await supabase
+        .from("app_settings")
+        .update({ value: "true", updated_at: new Date().toISOString() })
+        .eq("id", existing.id);
+    } else {
+      await supabase
+        .from("app_settings")
+        .insert({ key: "onboarding_completed", value: "true", organization_id: organizationId });
+    }
     navigate("/", { replace: true });
   };
 
