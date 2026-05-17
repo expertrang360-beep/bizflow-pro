@@ -91,7 +91,10 @@ function AppRoutes() {
     );
   }
 
-  if (!session) return <AuthPage />;
+  if (!session) {
+    if (location.pathname === "/auth") return <AuthPage />;
+    return <LandingPage />;
+  }
 
   if (location.pathname === "/onboarding") {
     return <OnboardingPage />;
