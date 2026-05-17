@@ -50,9 +50,34 @@ import { supabase } from "@/integrations/supabase/client";
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { session, loading } = useAuth();
+  const { session, loading, hasRole, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    if (!session || !user || !hasRole("owner")) {
+      setOnboardingChecked(true);
+      return;
+    }
+    if (location.pathname === "/onboarding") {
+      setOnboardingChecked(true);
+      return;
+    }
+    supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "onboarding_completed")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value !== "true") {
+          navigate("/onboarding", { replace: true });
+        }
+        setOnboardingChecked(true);
+      });
+  }, [session, user, hasRole, location.pathname, navigate]);
+
+  if (loading || (session && !onboardingChecked)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -66,6 +91,10 @@ function AppRoutes() {
   }
 
   if (!session) return <AuthPage />;
+
+  if (location.pathname === "/onboarding") {
+    return <OnboardingPage />;
+  }
 
   return (
     <AppLayout>
