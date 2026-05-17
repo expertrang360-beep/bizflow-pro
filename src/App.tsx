@@ -41,6 +41,7 @@ import SubscriptionPage from "@/pages/SubscriptionPage";
 import AdminLicensesPage from "@/pages/AdminLicensesPage";
 import PaymentPage from "@/pages/PaymentPage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import LandingPage from "@/pages/LandingPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FeatureGate from "@/components/FeatureGate";
 import { useEffect, useState } from "react";
