@@ -40,8 +40,12 @@ import AdvisorPage from "@/pages/AdvisorPage";
 import SubscriptionPage from "@/pages/SubscriptionPage";
 import AdminLicensesPage from "@/pages/AdminLicensesPage";
 import PaymentPage from "@/pages/PaymentPage";
+import OnboardingPage from "@/pages/OnboardingPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FeatureGate from "@/components/FeatureGate";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
