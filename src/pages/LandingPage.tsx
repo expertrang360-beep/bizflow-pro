@@ -253,7 +253,59 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section id="faq" className="px-4 py-16 sm:py-20 bg-muted/30">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3">Frequently asked questions</h2>
+            <p className="text-muted-foreground">Everything you need to know before getting started.</p>
+          </div>
+          <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border px-2 sm:px-4">
+            <AccordionItem value="pricing">
+              <AccordionTrigger className="text-left text-base font-semibold">
+                How much does BizKit cost?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Start free with a 14-day trial — no card required. After that, plans start at ₦5,000/month (Starter),
+                ₦15,000/month (Pro) and ₦50,000/month (Enterprise). Pay with card or bank transfer in Naira, cancel
+                anytime, and switch plans whenever your business grows.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="offline">
+              <AccordionTrigger className="text-left text-base font-semibold">
+                Does BizKit work offline?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Yes. BizKit is a Progressive Web App built offline-first — record sales, expenses and stock
+                movements without internet. Everything syncs automatically to the cloud the moment your connection
+                is back, so power and network issues never stop your business.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="setup">
+              <AccordionTrigger className="text-left text-base font-semibold">
+                How long does it take to set up?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Under 5 minutes. Our guided onboarding wizard walks you through your business profile, your first
+                product and your first sale. You can start ringing up customers the same day — no IT skills required.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="after-signup">
+              <AccordionTrigger className="text-left text-base font-semibold">
+                What happens right after I sign up?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                You're instantly placed on the 14-day Pro trial with full access to every feature. We'll take you
+                through the onboarding wizard, then drop you on your dashboard. Invite your team, add products,
+                start selling — and upgrade to a paid plan whenever you're ready.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
+
       {/* Final CTA */}
+
       <section className="px-4 py-16 sm:py-24">
         <div className="max-w-3xl mx-auto text-center bg-primary rounded-3xl p-8 sm:p-12 shadow-primary-btn">
           <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground mb-3">
