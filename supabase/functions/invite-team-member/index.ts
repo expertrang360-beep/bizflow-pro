@@ -70,8 +70,16 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ success: true, userId: newUser.user.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+  } catch (err: any) {
+    console.error("invite-team-member error:", err);
+    const msg = err?.message ?? "";
+    // Surface a small allowlist of safe validation messages, generic otherwise
+    const safe =
+      msg === "Missing authorization" || msg === "Unauthorized" ||
+      msg === "Only owners can invite team members" || msg === "Missing required fields"
+        ? msg
+        : "Unable to invite team member. Please try again.";
+    return new Response(JSON.stringify({ error: safe }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
