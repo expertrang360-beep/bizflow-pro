@@ -62,7 +62,7 @@ function AppRoutes() {
       setOnboardingChecked(true);
       return;
     }
-    if (location.pathname === "/onboarding") {
+    if (location.pathname === "/onboarding" || location.pathname === "/reset-password") {
       setOnboardingChecked(true);
       return;
     }
