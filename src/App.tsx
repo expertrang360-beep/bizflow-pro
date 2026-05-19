@@ -42,6 +42,7 @@ import AdminLicensesPage from "@/pages/AdminLicensesPage";
 import PaymentPage from "@/pages/PaymentPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import LandingPage from "@/pages/LandingPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FeatureGate from "@/components/FeatureGate";
 import { useEffect, useState } from "react";
@@ -61,7 +62,7 @@ function AppRoutes() {
       setOnboardingChecked(true);
       return;
     }
-    if (location.pathname === "/onboarding") {
+    if (location.pathname === "/onboarding" || location.pathname === "/reset-password") {
       setOnboardingChecked(true);
       return;
     }
@@ -90,6 +91,8 @@ function AppRoutes() {
       </div>
     );
   }
+
+  if (location.pathname === "/reset-password") return <ResetPasswordPage />;
 
   if (!session) {
     if (location.pathname === "/auth") return <AuthPage />;
