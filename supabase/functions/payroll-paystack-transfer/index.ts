@@ -42,6 +42,14 @@ Deno.serve(async (req) => {
     const { payroll_run_id } = await req.json();
     if (!payroll_run_id) throw new Error("Missing payroll_run_id");
 
+    // Verify caller's organization
+    const { data: callerProfile } = await adminClient
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", caller.id)
+      .single();
+    if (!callerProfile?.organization_id) throw new Error("Unauthorized");
+
     // Get the payroll run
     const { data: run, error: runErr } = await adminClient
       .from("payroll_runs")
@@ -49,6 +57,9 @@ Deno.serve(async (req) => {
       .eq("id", payroll_run_id)
       .single();
     if (runErr || !run) throw new Error("Payroll run not found");
+    if (run.organization_id !== callerProfile.organization_id) {
+      throw new Error("Unauthorized: payroll run does not belong to your organization");
+    }
     if (run.status !== "approved") throw new Error("Payroll must be approved before payment");
 
     // Get payroll items with staff details
