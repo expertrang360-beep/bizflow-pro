@@ -11,6 +11,7 @@ interface AuthContextType {
   organizationId: string | null;
   organizationName: string | null;
   loading: boolean;
+  rolesLoading: boolean;
   hasRole: (role: AppRole) => boolean;
   hasAnyRole: (roles: AppRole[]) => boolean;
   signOut: () => Promise<void>;
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   organizationId: null,
   organizationName: null,
   loading: true,
+  rolesLoading: true,
   hasRole: () => false,
   hasAnyRole: () => false,
   signOut: async () => {},
@@ -34,13 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] = useState(true);
 
   const fetchRoles = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    setRoles(data?.map((r) => r.role as AppRole) || []);
+    setRolesLoading(true);
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      setRoles(data?.map((r) => r.role as AppRole) || []);
+    } finally {
+      setRolesLoading(false);
+    }
   };
 
   const fetchOrganization = async (userId: string) => {
@@ -49,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("organization_id")
       .eq("id", userId)
       .single();
-    
+
     if (profile?.organization_id) {
       setOrganizationId(profile.organization_id);
       const { data: org } = await supabase
@@ -69,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchOrganization(session.user.id);
       } else {
         setRoles([]);
+        setRolesLoading(false);
         setOrganizationId(null);
         setOrganizationName(null);
       }
@@ -80,6 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         fetchRoles(session.user.id);
         fetchOrganization(session.user.id);
+      } else {
+        setRolesLoading(false);
       }
       setLoading(false);
     });
@@ -95,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, roles, organizationId, organizationName, loading, hasRole, hasAnyRole, signOut }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, roles, organizationId, organizationName, loading, rolesLoading, hasRole, hasAnyRole, signOut }}>
       {children}
     </AuthContext.Provider>
   );
