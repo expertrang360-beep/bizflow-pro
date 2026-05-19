@@ -10,19 +10,15 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { roles, loading } = useAuth();
+  const { roles, loading, rolesLoading, session } = useAuth();
 
-  if (loading) return null;
+  // Wait until both session and roles are resolved
+  if (loading || rolesLoading) return null;
 
-  // If roles haven't loaded yet (empty array), allow access to prevent flash redirects
-  // RLS policies are the real security enforcement
-  if (roles.length === 0) return <>{children}</>;
+  if (!session) return <Navigate to="/auth" replace />;
 
   const hasAccess = allowedRoles.some((role) => roles.includes(role));
-
-  if (!hasAccess) {
-    return <Navigate to="/" replace />;
-  }
+  if (!hasAccess) return <Navigate to="/" replace />;
 
   return <>{children}</>;
 }
