@@ -155,7 +155,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("payroll-paystack-transfer error:", err);
+    return new Response(JSON.stringify({ error: "Unable to process payroll transfer. Please try again." }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
