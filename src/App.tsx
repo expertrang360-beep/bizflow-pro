@@ -48,14 +48,25 @@ import FeatureGate from "@/components/FeatureGate";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigationHistory } from "@/hooks/useNavigationHistory";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes
+    },
+  },
+});
 
 function AppRoutes() {
   const { session, loading, hasRole, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [onboardingChecked, setOnboardingChecked] = useState(false);
+
+  // Track navigation history to prevent redirect loops
+  useNavigationHistory();
 
   useEffect(() => {
     if (!session || !user || !hasRole("owner")) {
@@ -66,17 +77,32 @@ function AppRoutes() {
       setOnboardingChecked(true);
       return;
     }
-    supabase
-      .from("app_settings")
-      .select("value")
-      .eq("key", "onboarding_completed")
-      .maybeSingle()
-      .then(({ data }) => {
+
+    // Check onboarding status with error handling
+    const checkOnboarding = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("app_settings")
+          .select("value")
+          .eq("key", "onboarding_completed")
+          .maybeSingle();
+
+        if (error) {
+          console.warn("Onboarding check error:", error);
+          setOnboardingChecked(true);
+          return;
+        }
+
         if (data?.value !== "true") {
+          // Use replace: true to prevent back button issues
           navigate("/onboarding", { replace: true });
         }
+      } finally {
         setOnboardingChecked(true);
-      });
+      }
+    };
+
+    checkOnboarding();
   }, [session, user, hasRole, location.pathname, navigate]);
 
   if (loading || (session && !onboardingChecked)) {
@@ -111,134 +137,220 @@ function AppRoutes() {
         <Route path="/sales/new" element={<NewSalePage />} />
         <Route path="/sales/:id" element={<SaleDetailPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
-        <Route path="/inventory/new" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <NewProductPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/inventory/:id" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <ProductDetailPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/reports" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <ReportsPage />
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/inventory/new"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <NewProductPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/:id"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <ProductDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <ReportsPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/more" element={<MorePage />} />
-        <Route path="/expenses" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <ExpensesPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/expenses/new" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <NewExpensePage />
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/expenses"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <ExpensesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/expenses/new"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <NewExpensePage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
-        <Route path="/suppliers" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <SuppliersPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/purchases" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <PurchasesPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/purchases/new" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <NewPurchasePage />
-          </ProtectedRoute>
-        } />
-        <Route path="/assets" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <AssetsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/assets/new" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <NewAssetPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/tax" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <TaxPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/profit-loss" element={
-          <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
-            <ProfitLossPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/team" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <TeamPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute allowedRoles={["owner"]}>
-            <SettingsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/raw-materials" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <RawMaterialsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/bom" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <BOMPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/production-orders" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <ProductionOrdersPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/production-costs" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <ProductionCostsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/production-costs/:id" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <ProductionCostDetailPage />
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/suppliers"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <SuppliersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/purchases"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <PurchasesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/purchases/new"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <NewPurchasePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/assets"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="assets" silent>
+                <AssetsPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/assets/new"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="assets" silent>
+                <NewAssetPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tax"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <TaxPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profit-loss"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager", "accountant"]}>
+              <ProfitLossPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/team"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <TeamPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute allowedRoles={["owner"]}>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/raw-materials"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="manufacturing" silent>
+                <RawMaterialsPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/bom"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="manufacturing" silent>
+                <BOMPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/production-orders"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="manufacturing" silent>
+                <ProductionOrdersPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/production-costs"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="manufacturing" silent>
+                <ProductionCostsPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/production-costs/:id"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="manufacturing" silent>
+                <ProductionCostDetailPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/daily-production" element={<DailyProductionPage />} />
-        <Route path="/advisor" element={
-          <ProtectedRoute allowedRoles={["owner", "manager"]}>
-            <FeatureGate feature="ai_advisor">
-              <AdvisorPage />
-            </FeatureGate>
-          </ProtectedRoute>
-        } />
-        <Route path="/payroll" element={
-          <ProtectedRoute allowedRoles={["owner"]}>
-            <FeatureGate feature="payroll">
-              <PayrollPage />
-            </FeatureGate>
-          </ProtectedRoute>
-        } />
-        <Route path="/subscription" element={
-          <ProtectedRoute allowedRoles={["owner"]}>
-            <SubscriptionPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/pay/:planId" element={
-          <ProtectedRoute allowedRoles={["owner"]}>
-            <PaymentPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/licenses" element={
-          <ProtectedRoute allowedRoles={["super_admin"]}>
-            <AdminLicensesPage />
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/advisor"
+          element={
+            <ProtectedRoute allowedRoles={["owner", "manager"]}>
+              <FeatureGate feature="ai_advisor">
+                <AdvisorPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payroll"
+          element={
+            <ProtectedRoute allowedRoles={["owner"]}>
+              <FeatureGate feature="payroll">
+                <PayrollPage />
+              </FeatureGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscription"
+          element={
+            <ProtectedRoute allowedRoles={["owner"]}>
+              <SubscriptionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pay/:planId"
+          element={
+            <ProtectedRoute allowedRoles={["owner"]}>
+              <PaymentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/licenses"
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+              <AdminLicensesPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

@@ -55,11 +55,32 @@ export function useSubscription() {
   const hasFeature = (key: keyof PlanFeatures["modules"]) =>
     Boolean(features.modules?.[key]);
 
+  const canAccess = (key: keyof PlanFeatures["modules"]) => {
+    if (!query.data) return false; // No subscription
+    if (query.data.status !== "active") return false; // Not active
+    return hasFeature(key);
+  };
+
+  const checkLimit = (
+    featureName: "max_branches" | "max_staff" | "max_products",
+    currentCount: number
+  ): { allowed: boolean; message?: string } => {
+    const limit = features[featureName];
+    if (limit === -1) return { allowed: true }; // Unlimited
+    if (currentCount >= limit) {
+      return {
+        allowed: false,
+        message: `You've reached your limit of ${limit} ${featureName.replace("max_", "")}.`,
+      };
+    }
+    return { allowed: true };
+  };
+
   const isExpired = query.data?.expires_at
     ? new Date(query.data.expires_at).getTime() < Date.now()
     : false;
 
-  const isActive = !!query.data && !isExpired;
+  const isActive = !!query.data && !isExpired && query.data.status === "active";
 
   const daysLeft = query.data?.expires_at
     ? Math.max(0, Math.ceil((new Date(query.data.expires_at).getTime() - Date.now()) / 86_400_000))
@@ -69,6 +90,8 @@ export function useSubscription() {
     subscription: query.data,
     features,
     hasFeature,
+    canAccess,
+    checkLimit,
     isActive,
     isExpired,
     daysLeft,

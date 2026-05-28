@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
+import BackButton from "@/components/BackButton";
 
 type Plan = {
   id: string;
@@ -68,9 +69,7 @@ export default function SubscriptionPage() {
   return (
     <div className="flex flex-col min-h-full pb-8">
       <div className="gradient-hero px-5 pt-12 pb-10">
-        <button onClick={() => navigate(-1)} className="text-primary-foreground/80 mb-3 flex items-center gap-1 text-sm">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
+        <BackButton fallback="/" className="text-primary-foreground/80 mb-3 flex items-center gap-1 text-sm" variant="ghost" />
         <h1 className="text-primary-foreground font-display text-2xl font-bold">Subscription</h1>
         <p className="text-primary-foreground/70 text-sm">Manage your plan and unlock features</p>
       </div>

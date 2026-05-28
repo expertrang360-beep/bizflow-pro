@@ -15,6 +15,9 @@ interface AuthContextType {
   hasRole: (role: AppRole) => boolean;
   hasAnyRole: (roles: AppRole[]) => boolean;
   signOut: () => Promise<void>;
+  // New: Auth hardening
+  passwordStrength?: "weak" | "medium" | "strong";
+  needsPasswordUpdate?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -37,6 +40,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [rolesLoading, setRolesLoading] = useState(true);
+  const [passwordStrength, setPasswordStrength] = useState<"weak" | "medium" | "strong">(
+    "medium"
+  );
+  const [needsPasswordUpdate, setNeedsPasswordUpdate] = useState(false);
 
   const fetchRoles = async (userId: string) => {
     setRolesLoading(true);
@@ -69,20 +76,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        fetchRoles(session.user.id);
-        fetchOrganization(session.user.id);
-      } else {
-        setRoles([]);
-        setRolesLoading(false);
-        setOrganizationId(null);
-        setOrganizationName(null);
+  // Check password strength and HIBP
+  const validatePasswordSecurity = async (password: string) => {
+    // Client-side password strength check
+    const strength = getPasswordStrength(password);
+    setPasswordStrength(strength);
+
+    // Server-side HIBP check (via edge function)
+    if (strength === "strong") {
+      try {
+        const { data, error } = await supabase.functions.invoke("check-hibp", {
+          body: { password },
+        });
+        if (error) console.warn("HIBP check failed:", error);
+        if (data?.leaked) {
+          setNeedsPasswordUpdate(true);
+        }
+      } catch (e) {
+        console.warn("Could not verify password against breach database");
       }
-      setLoading(false);
-    });
+    }
+  };
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        if (session?.user) {
+          fetchRoles(session.user.id);
+          fetchOrganization(session.user.id);
+        } else {
+          setRoles([]);
+          setRolesLoading(false);
+          setOrganizationId(null);
+          setOrganizationName(null);
+          setNeedsPasswordUpdate(false);
+        }
+        setLoading(false);
+      }
+    );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -103,13 +135,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setNeedsPasswordUpdate(false);
+    setPasswordStrength("medium");
   };
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, roles, organizationId, organizationName, loading, rolesLoading, hasRole, hasAnyRole, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        user: session?.user ?? null,
+        roles,
+        organizationId,
+        organizationName,
+        loading,
+        rolesLoading,
+        hasRole,
+        hasAnyRole,
+        signOut,
+        passwordStrength,
+        needsPasswordUpdate,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
 export const useAuth = () => useContext(AuthContext);
+
+// Password strength calculator
+function getPasswordStrength(password: string): "weak" | "medium" | "strong" {
+  if (!password) return "weak";
+  if (password.length < 8) return "weak";
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/.test(password);
+
+  const strength =
+    Number(hasUppercase) +
+    Number(hasLowercase) +
+    Number(hasNumbers) +
+    Number(hasSpecial);
+
+  if (strength >= 3 && password.length >= 12) return "strong";
+  if (strength >= 2 && password.length >= 10) return "medium";
+  return "weak";
+}
