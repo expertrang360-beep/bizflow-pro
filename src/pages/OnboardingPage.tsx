@@ -18,6 +18,7 @@ import {
   ArrowLeft,
   Sparkles,
 } from "lucide-react";
+import DeploymentChecklist from "@/components/DeploymentChecklist";
 
 type Step = 0 | 1 | 2 | 3 | 4;
 
@@ -247,6 +248,7 @@ export default function OnboardingPage() {
                 </div>
               ))}
             </div>
+            <DeploymentChecklist />
             <Button
               onClick={() => setStep(1)}
               className="w-full h-14 rounded-2xl font-bold text-base shadow-primary-btn"
@@ -346,6 +348,7 @@ export default function OnboardingPage() {
                 <li>• Set up your subscription plan</li>
               </ul>
             </div>
+            <DeploymentChecklist defaultOpen />
             <Button
               onClick={finish}
               className="w-full h-14 rounded-2xl font-bold text-base shadow-primary-btn"
