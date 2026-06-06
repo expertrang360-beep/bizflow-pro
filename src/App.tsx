@@ -116,7 +116,9 @@ function AppRoutes() {
 
   // Authenticated users should never see the public auth or landing screens
   if (location.pathname === "/auth" || location.pathname === "/landing") {
-    return <Navigate to="/" replace />;
+    const params = new URLSearchParams(location.search);
+    const redirect = params.get("redirect");
+    return <Navigate to={redirect && redirect.startsWith("/") ? redirect : "/"} replace />;
   }
 
   if (location.pathname === "/onboarding") {
