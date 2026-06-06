@@ -1,32 +1,54 @@
 # Deploying BizKit
 
-BizKit is a Vite + React SPA. Build with:
+BizKit is a Vite + React SPA built with `npm run build` → `dist/`.
+Every supported host has a config file checked into this repo so deep links
+(`/onboarding`, `/reset-password`, `/setup-status`, etc.) work out of the box.
 
-```bash
-npm install
-npm run build
-```
+## One-time setup on any host
 
-This produces a static `dist/` folder. Upload it to any host below — SPA fallback configs are already included so deep links (e.g. `/onboarding`, `/reset-password`) work correctly.
+Set these three environment variables in your host's dashboard (build-time vars for Vite):
 
-## Per-host setup
+| Variable                          | Where to find it                             |
+| --------------------------------- | -------------------------------------------- |
+| `VITE_SUPABASE_URL`               | Backend → Project Settings → API → URL       |
+| `VITE_SUPABASE_PUBLISHABLE_KEY`   | Backend → Project Settings → API → anon key  |
+| `VITE_SUPABASE_PROJECT_ID`        | Backend → Project Settings → General         |
 
-| Host                  | Config used                                |
-| --------------------- | ------------------------------------------ |
-| Netlify / Cloudflare  | `public/_redirects` (copied to `dist/`)    |
-| Vercel                | `vercel.json` at project root              |
-| Apache                | `public/.htaccess` (copied to `dist/`)     |
-| Azure Static Web Apps | `public/staticwebapp.config.json`          |
-| Nginx / custom VPS    | See `nginx.conf.example`                   |
-| GitHub Pages          | Add a `404.html` that is a copy of `index.html` |
-
-## Password reset & email links
-
-Auth code uses `window.location.origin`, so password-reset and email-verification links automatically point back to whatever domain serves the app — not to lovable.app.
-
-After deploying to your own domain, also update the allowed redirect URLs in **Lovable Cloud → Users → Auth Settings → URL Configuration**:
+Then add your production domain to **Backend → Users → Auth Settings → URL Configuration**:
 
 - **Site URL**: `https://your-domain.com`
-- **Redirect URLs**: add `https://your-domain.com/**`
+- **Redirect URLs**: `https://your-domain.com/**`
 
-Without this, Supabase Auth will reject the redirect and fall back to the default Site URL.
+Without this, password-reset and email-verification links will reject your domain.
+
+## Per-host config
+
+| Host                  | File used                                  | Build command           | Publish dir |
+| --------------------- | ------------------------------------------ | ----------------------- | ----------- |
+| **Vercel**            | `vercel.json`                              | auto (Vite preset)      | `dist`      |
+| **Render**            | `render.yaml`                              | `npm ci && npm run build` | `dist`    |
+| **Netlify**           | `netlify.toml`                             | `npm ci && npm run build` | `dist`    |
+| **Cloudflare Pages**  | `public/_redirects`                        | `npm run build`         | `dist`      |
+| **Apache**            | `public/.htaccess`                         | —                       | `dist`      |
+| **Azure Static Apps** | `public/staticwebapp.config.json`          | —                       | `dist`      |
+| **Nginx / VPS**       | see `nginx.conf.example`                   | —                       | `dist`      |
+| **GitHub Pages**      | copy `dist/index.html` to `dist/404.html`  | `npm run build`         | `dist`      |
+| **`npx serve`**       | `public/serve.json`                        | `npm run build`         | `dist`      |
+
+All configs include:
+- SPA fallback (`/* → /index.html`)
+- Immutable cache headers for `/assets/*`
+- Security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`)
+
+## Verify after deploying
+
+1. Visit `https://your-domain.com/setup-status` (Owner-only).
+2. Re-run the checklist — everything should be green.
+3. Deep-link to `https://your-domain.com/reset-password` and refresh; it must NOT 404.
+
+## Routing notes
+
+- Client-side routing is `BrowserRouter`. Unknown paths render the in-app 404, not the host 404.
+- `/index`, `/index.html`, `/home`, `/dashboard` redirect to `/`.
+- Unauthenticated deep links redirect to `/auth?redirect=<original>` and return after sign-in.
+- Auth code uses `window.location.origin`, so reset / verification links match the serving domain automatically.

@@ -95,9 +95,30 @@ function AppRoutes() {
 
   if (location.pathname === "/reset-password") return <ResetPasswordPage />;
 
+  // Normalize common aliases that other hosts (Render, Vercel, static servers) may surface
+  const aliasRedirects: Record<string, string> = {
+    "/index": "/",
+    "/index.html": "/",
+    "/home": "/",
+    "/dashboard": "/",
+  };
+  if (aliasRedirects[location.pathname]) {
+    return <Navigate to={aliasRedirects[location.pathname]} replace />;
+  }
+
   if (!session) {
     if (location.pathname === "/auth") return <AuthPage />;
-    return <LandingPage />;
+    if (location.pathname === "/onboarding") return <Navigate to="/auth" replace />;
+    if (location.pathname === "/" || location.pathname === "/landing") return <LandingPage />;
+    // Preserve intended destination for after sign-in
+    return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  }
+
+  // Authenticated users should never see the public auth or landing screens
+  if (location.pathname === "/auth" || location.pathname === "/landing") {
+    const params = new URLSearchParams(location.search);
+    const redirect = params.get("redirect");
+    return <Navigate to={redirect && redirect.startsWith("/") ? redirect : "/"} replace />;
   }
 
   if (location.pathname === "/onboarding") {
@@ -108,6 +129,7 @@ function AppRoutes() {
     <AppLayout>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
+
         <Route path="/sales" element={<SalesPage />} />
         <Route path="/sales/new" element={<NewSalePage />} />
         <Route path="/sales/:id" element={<SaleDetailPage />} />

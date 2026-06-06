@@ -34,7 +34,7 @@ const DOC_LINKS: Record<string, { label: string; href: string }[]> = {
     { label: "View subscription plans", href: "/subscription" },
   ],
   host: [
-    { label: "Deployment guide", href: "/DEPLOY.md" },
+    { label: "Connect a custom domain", href: "https://docs.lovable.dev/features/custom-domain" },
     { label: "Update Auth → URL Configuration", href: "https://supabase.com/docs/guides/auth/redirect-urls" },
   ],
 };
