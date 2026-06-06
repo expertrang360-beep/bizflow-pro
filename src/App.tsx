@@ -240,6 +240,11 @@ function AppRoutes() {
             <AdminLicensesPage />
           </ProtectedRoute>
         } />
+        <Route path="/setup-status" element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <SetupStatusPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
