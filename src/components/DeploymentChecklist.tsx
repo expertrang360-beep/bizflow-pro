@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, AlertCircle, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
-type CheckStatus = "ok" | "missing" | "warn" | "loading";
+export type CheckStatus = "ok" | "missing" | "warn" | "loading";
 
-interface CheckItem {
+export interface CheckItem {
   key: string;
   label: string;
   status: CheckStatus;
   hint?: string;
 }
+
+export { runChecks };
 
 /**
  * DeploymentChecklist
