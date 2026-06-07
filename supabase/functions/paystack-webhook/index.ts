@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
     await admin.rpc("activate_subscription_from_payment", { p_payment_id: payment.id });
     return new Response("ok");
   } catch (e) {
-    return new Response((e as Error).message, { status: 500 });
+    console.error("paystack-webhook error:", e);
+    return new Response("error", { status: 500 });
   }
 });

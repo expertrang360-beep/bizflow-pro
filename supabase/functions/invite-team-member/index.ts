@@ -36,6 +36,8 @@ Deno.serve(async (req) => {
 
     const { name, phone, email, password, role } = await req.json();
     if (!name || !email || !password || !role) throw new Error("Missing required fields");
+    const ALLOWED_ROLES = ["manager", "cashier", "accountant"];
+    if (!ALLOWED_ROLES.includes(role)) throw new Error("Invalid role");
 
     // Get caller's branch and organization
     const { data: callerProfile } = await adminClient
@@ -76,7 +78,8 @@ Deno.serve(async (req) => {
     // Surface a small allowlist of safe validation messages, generic otherwise
     const safe =
       msg === "Missing authorization" || msg === "Unauthorized" ||
-      msg === "Only owners can invite team members" || msg === "Missing required fields"
+      msg === "Only owners can invite team members" || msg === "Missing required fields" ||
+      msg === "Invalid role"
         ? msg
         : "Unable to invite team member. Please try again.";
     return new Response(JSON.stringify({ error: safe }), {
