@@ -36,6 +36,8 @@ Deno.serve(async (req) => {
 
     const { name, phone, email, password, role } = await req.json();
     if (!name || !email || !password || !role) throw new Error("Missing required fields");
+    const ALLOWED_ROLES = ["manager", "cashier", "accountant"];
+    if (!ALLOWED_ROLES.includes(role)) throw new Error("Invalid role");
 
     // Get caller's branch and organization
     const { data: callerProfile } = await adminClient

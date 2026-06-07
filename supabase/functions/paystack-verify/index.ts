@@ -5,20 +5,38 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    // Require auth
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return json({ error: "Unauthorized" }, 401);
+    const userClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user } } = await userClient.auth.getUser();
+    if (!user) return json({ error: "Unauthorized" }, 401);
+
     const { reference } = await req.json();
-    if (!reference) {
-      return new Response(JSON.stringify({ error: "reference required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    if (!reference || typeof reference !== "string") return json({ error: "reference required" }, 400);
 
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Caller's org
+    const { data: profile } = await admin.from("profiles").select("organization_id").eq("id", user.id).maybeSingle();
+    if (!profile?.organization_id) return json({ error: "No organization" }, 403);
+
     const { data: payment } = await admin.from("payment_transactions").select("*").eq("reference", reference).maybeSingle();
-    if (!payment) return new Response(JSON.stringify({ error: "Payment not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!payment) return json({ error: "Payment not found" }, 404);
+    if (payment.organization_id !== profile.organization_id) return json({ error: "Forbidden" }, 403);
 
     if (payment.status === "approved") {
-      return new Response(JSON.stringify({ status: "approved", subscription_id: payment.subscription_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({ status: "approved", subscription_id: payment.subscription_id });
     }
 
     const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
@@ -28,20 +46,21 @@ Deno.serve(async (req) => {
 
     if (!verifyData.status || verifyData.data?.status !== "success") {
       await admin.from("payment_transactions").update({ status: "failed", metadata: { ...(payment.metadata as object || {}), verify: verifyData } }).eq("id", payment.id);
-      return new Response(JSON.stringify({ status: "failed", message: verifyData.message || "Verification failed" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({ status: "failed", message: "Verification failed" });
     }
 
     const paidAmount = (verifyData.data.amount || 0) / 100;
     if (paidAmount < Number(payment.amount)) {
       await admin.from("payment_transactions").update({ status: "failed", admin_note: "Underpayment" }).eq("id", payment.id);
-      return new Response(JSON.stringify({ status: "failed", message: "Underpayment" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({ status: "failed", message: "Underpayment" });
     }
 
     const { data: subId, error: actErr } = await admin.rpc("activate_subscription_from_payment", { p_payment_id: payment.id });
     if (actErr) throw actErr;
 
-    return new Response(JSON.stringify({ status: "approved", subscription_id: subId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return json({ status: "approved", subscription_id: subId });
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    console.error("paystack-verify error:", e);
+    return json({ error: "Payment verification failed. Please try again." }, 500);
   }
 });
