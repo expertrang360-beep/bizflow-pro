@@ -1,12 +1,36 @@
-# Render.com static site config
+# Render.com Static Site config (modern schema)
 # Docs: https://render.com/docs/static-sites
+#
+# IMPORTANT: This file uses `type: static`. Do NOT use `type: web + env: static`
+# (the legacy form) — Render's newer dashboard provisions that as a Web Service
+# and the build will fail with "No open ports detected".
+
 services:
-  - type: web
-    name: bizkit
-    env: static
-    buildCommand: npm ci && npm run build
+  - type: static
+    name: bizflow
+    runtime: static
+    # Bun is faster and uses far less memory than npm during install.
+    # NODE_OPTIONS lifts vite's heap ceiling to 4 GB so the build doesn't OOM
+    # (default Node heap on small Render instances is ~512 MB).
+    buildCommand: |
+      curl -fsSL https://bun.sh/install | bash
+      export PATH="$HOME/.bun/bin:$PATH"
+      bun install --frozen-lockfile
+      NODE_OPTIONS="--max-old-space-size=4096" bun run build
     staticPublishPath: ./dist
     pullRequestPreviewsEnabled: true
+
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=4096
+      # Set these in the Render dashboard (Environment tab) — do NOT commit secrets:
+      #   VITE_SUPABASE_URL
+      #   VITE_SUPABASE_PUBLISHABLE_KEY
+      #   VITE_SUPABASE_PROJECT_ID
+      #   VITE_SITE_URL=https://bizflow.smarttechpro.online
+
     headers:
       - path: /assets/*
         name: Cache-Control
@@ -20,6 +44,10 @@ services:
       - path: /*
         name: Referrer-Policy
         value: strict-origin-when-cross-origin
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
+
     routes:
       - type: rewrite
         source: /*
