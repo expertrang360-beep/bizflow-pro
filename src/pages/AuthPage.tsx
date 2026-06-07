@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Briefcase, Lock, Mail, User, Eye, EyeOff, ArrowRight, Phone } from "lucide-react";
+import { siteUrl } from "@/lib/site-url";
 
 type Mode = "login" | "signup" | "forgot";
 type SignupMethod = "email" | "phone";
