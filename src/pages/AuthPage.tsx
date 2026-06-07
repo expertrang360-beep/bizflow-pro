@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Briefcase, Lock, Mail, User, Eye, EyeOff, ArrowRight, Phone } from "lucide-react";
+import { siteUrl } from "@/lib/site-url";
 
 type Mode = "login" | "signup" | "forgot";
 type SignupMethod = "email" | "phone";
@@ -42,7 +43,7 @@ export default function AuthPage() {
           password,
           options: {
             data: { name, phone: signupMethod === "phone" ? phone : (phone || undefined), business_name: businessName || undefined },
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: siteUrl("/"),
           },
         });
         if (error) throw error;
@@ -53,7 +54,7 @@ export default function AuthPage() {
         if (error) throw error;
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: siteUrl("/reset-password"),
         });
         if (error) throw error;
         toast({ title: "Reset link sent!", description: "Check your email for the password reset link." });
