@@ -4,19 +4,36 @@
 # IMPORTANT: This file uses `type: static`. Do NOT use `type: web + env: static`
 # (the legacy form) — Render's newer dashboard provisions that as a Web Service
 # and the build will fail with "No open ports detected".
+#
+# Runtime notes:
+# - Render auto-detects Bun when `bun.lockb` is present. We install Bun
+#   explicitly to pin behavior and avoid relying on the default version.
+# - NODE_OPTIONS is exported in EVERY build step so Vite/esbuild/Rollup all
+#   see the raised heap ceiling (default Node heap on small instances ~512MB).
 
 services:
   - type: static
     name: bizflow
     runtime: static
-    # Bun is faster and uses far less memory than npm during install.
-    # NODE_OPTIONS lifts vite's heap ceiling to 4 GB so the build doesn't OOM
-    # (default Node heap on small Render instances is ~512 MB).
+
     buildCommand: |
-      curl -fsSL https://bun.sh/install | bash
-      export PATH="$HOME/.bun/bin:$PATH"
-      bun install --frozen-lockfile
-      NODE_OPTIONS="--max-old-space-size=4096" bun run build
+      set -euo pipefail
+      export NODE_OPTIONS="--max-old-space-size=4096"
+      echo "Node: $(node -v)  NODE_OPTIONS=$NODE_OPTIONS"
+
+      # Install Bun (pinned) and put it on PATH for the rest of the build.
+      curl -fsSL https://bun.sh/install | bash -s "bun-v1.1.34"
+      export BUN_INSTALL="$HOME/.bun"
+      export PATH="$BUN_INSTALL/bin:$PATH"
+      echo "Bun: $(bun --version)"
+
+      # Install deps from the lockfile, then build.
+      NODE_OPTIONS="$NODE_OPTIONS" bun install --frozen-lockfile
+      NODE_OPTIONS="$NODE_OPTIONS" bun run build
+
+      # Sanity check: fail fast if dist/ wasn't produced.
+      test -f ./dist/index.html || { echo "Build failed: dist/index.html missing"; exit 1; }
+
     staticPublishPath: ./dist
     pullRequestPreviewsEnabled: true
 
@@ -25,6 +42,8 @@ services:
         value: 20.18.0
       - key: NODE_OPTIONS
         value: --max-old-space-size=4096
+      - key: CI
+        value: "true"
       # Set these in the Render dashboard (Environment tab) — do NOT commit secrets:
       #   VITE_SUPABASE_URL
       #   VITE_SUPABASE_PUBLISHABLE_KEY
