@@ -960,6 +960,13 @@ export type Database = {
             referencedRelation: "staff_salaries"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payroll_items_staff_salary_id_fkey"
+            columns: ["staff_salary_id"]
+            isOneToOne: false
+            referencedRelation: "staff_salaries_with_bank"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payroll_runs: {
@@ -2040,7 +2047,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      staff_salaries_with_bank: {
+        Row: {
+          account_number: string | null
+          active: boolean | null
+          bank_name: string | null
+          base_salary: number | null
+          branch_id: string | null
+          created_at: string | null
+          id: string | null
+          organization_id: string | null
+          role: string | null
+          staff_name: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_number?: string | null
+          active?: boolean | null
+          bank_name?: string | null
+          base_salary?: number | null
+          branch_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          organization_id?: string | null
+          role?: string | null
+          staff_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_number?: string | null
+          active?: boolean | null
+          bank_name?: string | null
+          base_salary?: number | null
+          branch_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          organization_id?: string | null
+          role?: string | null
+          staff_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_salaries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_salaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       activate_subscription_from_payment: {
