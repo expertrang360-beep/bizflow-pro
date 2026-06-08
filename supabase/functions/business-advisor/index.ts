@@ -167,7 +167,11 @@ RULES:
     });
   } catch (e) {
     console.error("business-advisor error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    const safe = ["No authorization header", "Unauthorized"].includes(msg)
+      ? msg
+      : "Unable to process your request. Please try again.";
+    return new Response(JSON.stringify({ error: safe }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
