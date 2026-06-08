@@ -45,6 +45,7 @@ import LandingPage from "@/pages/LandingPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import SetupStatusPage from "@/pages/SetupStatusPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import InstallPrompt from "@/components/InstallPrompt";
 import FeatureGate from "@/components/FeatureGate";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
