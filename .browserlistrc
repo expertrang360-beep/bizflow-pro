@@ -1,0 +1,25 @@
+# BizFlow Pro Browser Support Configuration
+# Last updated by update-browserslist-db
+
+last 2 versions
+> 1%
+not dead
+not IE 11
+
+# Chrome
+chrome >= 90
+
+# Firefox
+firefox >= 88
+
+# Safari
+safari >= 14
+
+# Edge
+edge >= 90
+
+# iOS Safari
+ios_saf >= 14
+
+# Android Browser
+android >= 90
