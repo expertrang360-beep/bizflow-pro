@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessType } from "@/hooks/useBusinessType";
 import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound, Package, FileStack, Factory, Calculator, ClipboardList, Sparkles, Crown, ShieldCheck, Rocket } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import InstallStatusCard from "@/components/InstallStatusCard";
 
 type AppRole = "owner" | "manager" | "cashier" | "accountant";
 
@@ -80,6 +81,9 @@ export default function MorePage() {
             </button>
           ))}
         </div>
+
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pt-2">App</h2>
+        <InstallStatusCard />
 
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pt-2">Account</h2>
         <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">

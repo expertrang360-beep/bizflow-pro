@@ -1,26 +1,10 @@
 import { useEffect, useState } from "react";
 import { Download, X, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
+import { useInstallStatus } from "@/hooks/useInstallStatus";
 
 const DISMISS_KEY = "bizflow_install_dismissed_at";
 const DISMISS_DAYS = 7;
-
-function isStandalone() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    // iOS Safari
-    (window.navigator as any).standalone === true
-  );
-}
-
-function isIOS() {
-  return /iphone|ipad|ipod/i.test(window.navigator.userAgent) && !(window as any).MSStream;
-}
 
 function recentlyDismissed() {
   const ts = localStorage.getItem(DISMISS_KEY);
@@ -29,47 +13,25 @@ function recentlyDismissed() {
 }
 
 export default function InstallPrompt() {
-  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
-  const [show, setShow] = useState(false);
-  const [showIOS, setShowIOS] = useState(false);
+  const { status, promptInstall } = useInstallStatus();
+  const [dismissed, setDismissed] = useState(recentlyDismissed);
+  const [showIOSDelay, setShowIOSDelay] = useState(false);
 
   useEffect(() => {
-    if (isStandalone() || recentlyDismissed()) return;
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferred(e as BeforeInstallPromptEvent);
-      setShow(true);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-
-    // iOS has no beforeinstallprompt — show manual instructions after short delay
-    if (isIOS()) {
-      const t = setTimeout(() => setShowIOS(true), 2500);
-      return () => {
-        window.removeEventListener("beforeinstallprompt", handler);
-        clearTimeout(t);
-      };
+    if (status === "ios-manual") {
+      const t = setTimeout(() => setShowIOSDelay(true), 2500);
+      return () => clearTimeout(t);
     }
-
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  }, [status]);
 
   const dismiss = () => {
     localStorage.setItem(DISMISS_KEY, String(Date.now()));
-    setShow(false);
-    setShowIOS(false);
+    setDismissed(true);
   };
 
-  const install = async () => {
-    if (!deferred) return;
-    await deferred.prompt();
-    await deferred.userChoice;
-    setDeferred(null);
-    setShow(false);
-  };
-
-  if (!show && !showIOS) return null;
+  if (dismissed) return null;
+  if (status === "installed" || status === "unsupported") return null;
+  if (status === "ios-manual" && !showIOSDelay) return null;
 
   return (
     <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md animate-fade-in">
@@ -79,7 +41,7 @@ export default function InstallPrompt() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm">Install BizFlow</p>
-          {show ? (
+          {status === "available" ? (
             <p className="text-xs text-muted-foreground mt-0.5">
               Add to your home screen for a faster, app-like experience.
             </p>
@@ -88,8 +50,8 @@ export default function InstallPrompt() {
               Tap <Share className="w-3 h-3 inline" /> then "Add to Home Screen".
             </p>
           )}
-          {show && (
-            <Button size="sm" onClick={install} className="mt-2 h-8">
+          {status === "available" && (
+            <Button size="sm" onClick={promptInstall} className="mt-2 h-8">
               Install
             </Button>
           )}
