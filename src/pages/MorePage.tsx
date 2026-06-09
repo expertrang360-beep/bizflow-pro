@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessType } from "@/hooks/useBusinessType";
 import { TrendingDown, Users, Truck, BookOpen, Settings, LogOut, ChevronRight, Briefcase, Building2, Receipt, DollarSign, FileText, UsersRound, Package, FileStack, Factory, Calculator, ClipboardList, Sparkles, Crown, ShieldCheck, Rocket } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import InstallStatusCard from "@/components/InstallStatusCard";
 
 type AppRole = "owner" | "manager" | "cashier" | "accountant";
 
