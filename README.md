@@ -1,73 +1,66 @@
-# Welcome to your Lovable project
+# BizFlow
 
-## Project info
+Business management PWA for Nigerian SMEs — sales, inventory, expenses,
+customers, suppliers, payroll, manufacturing, and AI advisor.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Stack: React 18 + Vite + TypeScript + Tailwind + shadcn/ui + Supabase
+(Postgres, Auth, Storage, Edge Functions).
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Quick start (local dev)
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+bun install
+cp .env.example .env   # fill in the three VITE_SUPABASE_* values
+bun run dev            # http://localhost:8080
 ```
 
-**Edit a file directly in GitHub**
+Required env vars (build-time, read by Vite):
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Variable                          | Where to find it                            |
+| --------------------------------- | ------------------------------------------- |
+| `VITE_SUPABASE_URL`               | Supabase project → Settings → API → URL     |
+| `VITE_SUPABASE_PUBLISHABLE_KEY`   | Supabase project → Settings → API → anon    |
+| `VITE_SUPABASE_PROJECT_ID`        | Supabase project → Settings → General       |
+| `VITE_SITE_URL` *(prod only)*     | Your production URL, e.g. `https://bizflow.smarttechpro.online` |
 
-**Use GitHub Codespaces**
+`VITE_SITE_URL` is critical in production — auth emails (password reset,
+email confirmation) link back to this URL.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## Deploy
 
-This project is built with:
+See **[DEPLOY_RENDER.md](./DEPLOY_RENDER.md)** for the full Render +
+custom-domain walkthrough.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## Project layout
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```
+src/
+  pages/           route components
+  components/      shared UI (shadcn/ui under components/ui)
+  contexts/        AuthContext
+  hooks/           useAuth, useSubscription, useInstallStatus, ...
+  integrations/supabase/   auto-generated client + types (do NOT edit)
+  lib/             helpers (siteUrl, receipt PDF, navigation)
+supabase/
+  migrations/      database schema history
+  functions/       edge functions
+email-templates/   custom SMTP HTML templates
+```
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## Useful scripts
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```bash
+bun run dev        # local dev server (port 8080)
+bun run build      # production build → dist/
+bun run preview    # serve built dist/ locally
+bun run lint       # eslint
+bunx vitest run    # tests
+```
