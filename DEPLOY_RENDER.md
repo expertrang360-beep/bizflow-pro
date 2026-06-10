@@ -26,12 +26,12 @@ etc.) work immediately after DNS resolves — no extra redirect config required.
 
 In the Render service → **Environment** tab, add:
 
-| Key                              | Value                                              |
-| -------------------------------- | -------------------------------------------------- |
-| `VITE_SUPABASE_URL`              | from Supabase → Settings → API                     |
-| `VITE_SUPABASE_PUBLISHABLE_KEY`  | from Supabase → Settings → API (anon key)          |
-| `VITE_SUPABASE_PROJECT_ID`       | from Supabase → Settings → General                 |
-| `VITE_SITE_URL`                  | `https://bizflow.smarttechpro.online`              |
+| Key                              | Value                                                                |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL`              | `https://gnhidwappdlwuwnuhyoc.supabase.co`                           |
+| `VITE_SUPABASE_PUBLISHABLE_KEY`  | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduaGlkd2FwcGRsd3V3bnVoeW9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5Mzk2MjAsImV4cCI6MjA4OTUxNTYyMH0.j-4Bb0exBrwYKvfBoe1Z50s6hb7jSXezFxEecL3Smkg` |
+| `VITE_SUPABASE_PROJECT_ID`       | `gnhidwappdlwuwnuhyoc`                                               |
+| `VITE_SITE_URL`                  | `https://bizflow.smarttechpro.online`                                |
 
 Save → trigger **Manual Deploy → Clear build cache & deploy**.
 
@@ -60,7 +60,7 @@ up to 24h).
 
 Without this, password-reset emails and confirmation links 404.
 
-Supabase project → **Authentication → URL Configuration**:
+In your **new Supabase project** (`gnhidwappdlwuwnuhyoc`) → **Authentication → URL Configuration**:
 
 - **Site URL**: `https://bizflow.smarttechpro.online`
 - **Redirect URLs** (add both):
@@ -86,7 +86,14 @@ Auth → **Email Templates**.
 
 ---
 
-## 6. Verify
+## 6. Migrate the database
+
+See **[MIGRATE_SUPABASE.md](./MIGRATE_SUPABASE.md)** for pushing the schema
+to your new project.
+
+---
+
+## 7. Verify
 
 After the first successful deploy, sign in as an owner and visit:
 
