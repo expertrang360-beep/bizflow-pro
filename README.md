@@ -12,21 +12,31 @@ Stack: React 18 + Vite + TypeScript + Tailwind + shadcn/ui + Supabase
 
 ```bash
 bun install
-cp .env.example .env   # fill in the three VITE_SUPABASE_* values
+cp .env.example .env   # values are already filled for the linked Supabase project
 bun run dev            # http://localhost:8080
 ```
 
 Required env vars (build-time, read by Vite):
 
-| Variable                          | Where to find it                            |
-| --------------------------------- | ------------------------------------------- |
-| `VITE_SUPABASE_URL`               | Supabase project → Settings → API → URL     |
-| `VITE_SUPABASE_PUBLISHABLE_KEY`   | Supabase project → Settings → API → anon    |
-| `VITE_SUPABASE_PROJECT_ID`        | Supabase project → Settings → General       |
-| `VITE_SITE_URL` *(prod only)*     | Your production URL, e.g. `https://bizflow.smarttechpro.online` |
+| Variable                          | Value                                    |
+| --------------------------------- | ---------------------------------------- |
+| `VITE_SUPABASE_URL`               | `https://gnhidwappdlwuwnuhyoc.supabase.co` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY`   | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `VITE_SUPABASE_PROJECT_ID`        | `gnhidwappdlwuwnuhyoc`                   |
+| `VITE_SITE_URL` *(prod only)*     | `https://bizflow.smarttechpro.online`    |
 
 `VITE_SITE_URL` is critical in production — auth emails (password reset,
 email confirmation) link back to this URL.
+
+---
+
+## Database
+
+This project now uses your own Supabase project:
+- **Project ref**: `gnhidwappdlwuwnuhyoc`
+- **Dashboard**: https://supabase.com/dashboard/project/gnhidwappdlwuwnuhyoc
+
+See **[MIGRATE_SUPABASE.md](./MIGRATE_SUPABASE.md)** to apply the schema.
 
 ---
 
