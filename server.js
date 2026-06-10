@@ -1,23 +1,27 @@
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 10000;
 
 const distPath = path.join(__dirname, "dist");
 
 console.log("DIST EXISTS:", fs.existsSync(distPath));
-const app = express();
-const PORT = process.env.PORT || 10000;
+console.log("DIST PATH:", distPath);
 
-app.use(express.static(path.join(__dirname, "dist")));
+app.use(express.static(distPath));
 
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", service: "BizFlow Pro" });
+  res.json({ status: "ok" });
 });
 
-app.get("/api/status", (req, res) => {
-  res.json({ app: "BizFlow Pro" });
-});
-
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 app.listen(PORT, () => {
