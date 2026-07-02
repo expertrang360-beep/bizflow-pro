@@ -83,7 +83,9 @@ export default function MorePage() {
         </div>
 
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pt-2">App</h2>
-        <InstallStatusCard />
+        <button onClick={() => navigate("/install-status")} className="w-full text-left">
+          <InstallStatusCard />
+        </button>
 
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pt-2">Account</h2>
         <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">

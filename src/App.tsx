@@ -44,6 +44,7 @@ import OnboardingPage from "@/pages/OnboardingPage";
 import LandingPage from "@/pages/LandingPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import SetupStatusPage from "@/pages/SetupStatusPage";
+import InstallStatusPage from "@/pages/InstallStatusPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import InstallPrompt from "@/components/InstallPrompt";
 import FeatureGate from "@/components/FeatureGate";
@@ -268,6 +269,7 @@ function AppRoutes() {
             <SetupStatusPage />
           </ProtectedRoute>
         } />
+        <Route path="/install-status" element={<InstallStatusPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
